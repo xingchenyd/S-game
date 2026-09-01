@@ -69,7 +69,7 @@ h1, h2, h3, .story-info > b, .theme-copy > b { font-family: var(--display-font);
 .world-interaction { min-height:76px; max-width:min(440px,calc(100vw - 32px)); padding:12px; overflow:visible; border:2px solid #65dce885 !important; border-radius:18px; background:linear-gradient(145deg,#123b44f7,#061b22f7) !important; box-shadow:inset 0 1px #ffffff20,0 12px 30px #0009; }
 .world-interaction > span { min-width:0; }
 .world-interaction small, .world-interaction b { width:max-content; max-width:100%; padding:3px 7px; border-radius:8px; background:#020d12d9; }
-.game-shell .world-facility { overflow:visible !important; }
+.game-shell .world-facility { position:absolute !important; overflow:visible !important; }
 .world-facility .facility-sign { min-width:max-content; max-width:none; overflow:visible; }
 .world-facility .facility-sign small, .world-facility .facility-sign b, .world-facility .facility-sign em { flex:none; width:max-content; max-width:none; white-space:nowrap; overflow:visible; }
 .world-brand { width:190px; height:58px; padding:0; overflow:hidden !important; display:grid; grid-template-columns:1fr; border:1px solid #69dce555; border-radius:14px; background:#061a20e8; box-shadow:0 8px 20px #0008; pointer-events:auto; }
