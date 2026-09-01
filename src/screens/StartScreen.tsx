@@ -1,5 +1,5 @@
-import { ChevronLeft, ChevronRight, LogIn, UserRound } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import GameIcon from '../components/GameIcon'
 import type { PlayerProfile } from '../types'
 import { listUsers, loginOrCreate } from '../store/profile'
 import { playUiSound } from '../store/audio'
@@ -37,8 +37,8 @@ export default function StartScreen({ onLogin }: { onLogin: (profile: PlayerProf
         {covers.map((cover, index) => <img key={cover.src} className={index === slide ? 'active' : ''} src={cover.src} alt={cover.line} />)}
       </div>
       <div className="cover-vignette" />
-      <button className="carousel-arrow prev" onClick={() => setSlide((slide + covers.length - 1) % covers.length)} aria-label="上一张封面"><ChevronLeft /></button>
-      <button className="carousel-arrow next" onClick={() => setSlide((slide + 1) % covers.length)} aria-label="下一张封面"><ChevronRight /></button>
+      <button className="carousel-arrow prev" onClick={() => setSlide((slide + covers.length - 1) % covers.length)} aria-label="上一张封面"><span className="control-arrow" /></button>
+      <button className="carousel-arrow next" onClick={() => setSlide((slide + 1) % covers.length)} aria-label="下一张封面"><span className="control-arrow" /></button>
 
       <section className="login-panel">
         <div className="title-lockup">
@@ -48,9 +48,9 @@ export default function StartScreen({ onLogin }: { onLogin: (profile: PlayerProf
         </div>
         <div className="login-card">
           <label htmlFor="username">用户名存档</label>
-          <div className="name-field"><UserRound /><input id="username" maxLength={12} value={username} onChange={(event) => { setUsername(event.target.value); setError('') }} onKeyDown={(event) => event.key === 'Enter' && enter()} placeholder="输入 1–12 个字符" autoComplete="nickname" /></div>
+          <div className="name-field"><GameIcon name="user" size={38} /><input id="username" maxLength={12} value={username} onChange={(event) => { setUsername(event.target.value); setError('') }} onKeyDown={(event) => event.key === 'Enter' && enter()} placeholder="输入 1–12 个字符" autoComplete="nickname" /></div>
           {error && <span className="field-error">{error}</span>}
-          <button className="primary-button start-button" onClick={() => enter()}><LogIn /> 开始游戏</button>
+          <button className="primary-button start-button" onClick={() => enter()}><GameIcon name="prototype" size={38} /> 开始游戏</button>
           {users.length > 0 && <div className="recent-users"><span>继续最近存档</span>{users.map((user) => <button key={user.username} onClick={() => enter(user.username)}><b>LV.{user.level}</b>{user.username}</button>)}</div>}
           <small>无需密码。存档仅保存在当前设备浏览器中。</small>
         </div>

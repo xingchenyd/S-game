@@ -5,6 +5,7 @@ import { playUiSound } from '../store/audio'
 import { bosses, elitesFor, enemiesFor, type EnemyDefinition } from '../data/enemies'
 import { difficultyTuning } from '../data/balance'
 import { assetUrl } from '../utils/assets'
+import GameIcon from '../components/GameIcon'
 
 export interface BattleResult { purified: number; damageTaken: number; value: number }
 
@@ -692,8 +693,8 @@ export default function PhaserCombat(props: Props) {
   return <div className="combat-stage">
     <div ref={host} className="phaser-host" />
     <div className="touch-controls" aria-label="触屏控制">
-      <div className="dpad"><button {...holdProps('up')} className="up">▲</button><button {...holdProps('left')} className="left">◀</button><button {...holdProps('down')} className="down">▼</button><button {...holdProps('right')} className="right">▶</button></div>
-      <div className="action-pad"><button {...holdProps('charge')} className="charge">蓄力工具<small>按住 E</small></button><button onPointerDown={() => control('pulse')} className={`pulse ${(props.pulseCooldown ?? 0) <= 0 ? 'is-ready' : ''}`}>定向脉冲<small>{(props.pulseCooldown ?? 0) <= 0 ? 'Q · 可用' : `${props.pulseCooldown?.toFixed(1)}s`}</small></button><button onPointerDown={() => control('finisher')} className={`finisher ${(props.finisherCharge ?? 0) >= 100 ? 'is-ready' : ''}`}>原型终结<small>R · {Math.round(props.finisherCharge ?? 0)}%</small></button><button onPointerDown={() => control('dash')} className={`dash ${(props.dashCooldown ?? 0) <= 0 ? 'is-ready' : ''}`}>冲刺<small>{(props.dashCooldown ?? 0) <= 0 ? 'SPACE' : `${props.dashCooldown?.toFixed(1)}s`}</small></button></div>
+      <div className="dpad"><button {...holdProps('up')} className="up"><span className="control-arrow" /></button><button {...holdProps('left')} className="left"><span className="control-arrow" /></button><button {...holdProps('down')} className="down"><span className="control-arrow" /></button><button {...holdProps('right')} className="right"><span className="control-arrow" /></button></div>
+      <div className="action-pad"><button {...holdProps('charge')} className="charge"><GameIcon name="charge" size={42} /><span>蓄力</span><small>按住 E</small></button><button onPointerDown={() => control('pulse')} className={`pulse ${(props.pulseCooldown ?? 0) <= 0 ? 'is-ready' : ''}`}><GameIcon name="pulse" size={42} /><span>脉冲</span><small>{(props.pulseCooldown ?? 0) <= 0 ? 'Q · 可用' : `${props.pulseCooldown?.toFixed(1)}s`}</small></button><button onPointerDown={() => control('finisher')} className={`finisher ${(props.finisherCharge ?? 0) >= 100 ? 'is-ready' : ''}`}><GameIcon name="ultimate" size={42} /><span>终结</span><small>R · {Math.round(props.finisherCharge ?? 0)}%</small></button><button onPointerDown={() => control('dash')} className={`dash ${(props.dashCooldown ?? 0) <= 0 ? 'is-ready' : ''}`}><GameIcon name="dash" size={38} /><span>冲刺</span><small>{(props.dashCooldown ?? 0) <= 0 ? '空格' : `${props.dashCooldown?.toFixed(1)}s`}</small></button></div>
     </div>
   </div>
 }

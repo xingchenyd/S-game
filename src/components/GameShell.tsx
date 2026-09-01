@@ -1,7 +1,7 @@
-import { Expand, Minimize, Volume1, Volume2, VolumeX } from 'lucide-react'
 import { useEffect, useState, type ReactNode } from 'react'
 import type { PlayerProfile, Screen } from '../types'
 import PixelIcon from './PixelIcon'
+import GameIcon from './GameIcon'
 
 interface Props {
   children: ReactNode
@@ -75,11 +75,11 @@ export default function GameShell({ children, profile, screen, onNavigate, onSet
           <input id="master-volume" type="range" min="0" max="1" step="0.05" value={profile.settings.masterVolume} onChange={(event) => setVolume(Number(event.target.value))} />
         </div>
         <button onClick={() => setVolumeOpen((value) => !value)} aria-label="调节音量" aria-expanded={volumeOpen}>
-          {profile.settings.masterVolume === 0 ? <VolumeX /> : profile.settings.masterVolume < .5 ? <Volume1 /> : <Volume2 />}
+          <GameIcon name="volume" size={30} />
           <span>音量</span>
         </button>
         <button onClick={toggleFullscreen} aria-label={fullscreen ? '退出全屏' : '进入全屏'}>
-          {fullscreen ? <Minimize /> : <Expand />}<span>{fullscreen ? '退出全屏' : '全屏'}</span>
+          <GameIcon name="fullscreen" size={30} /><span>{fullscreen ? '退出全屏' : '全屏'}</span>
         </button>
       </div>
     </div>

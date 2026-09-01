@@ -1,7 +1,15 @@
-import { ArrowLeft, BookOpenCheck, Check, ChevronRight, RotateCcw, ShieldCheck, Sparkles } from 'lucide-react'
+import { ArrowLeft, Check, ChevronRight, RotateCcw } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { modeSimulations, playModes } from '../data/playModes'
 import type { PlayerProfile, PlayModeDefinition } from '../types'
+import GameIcon, { type GameIconName } from '../components/GameIcon'
+
+const modeIcon = (id: string): GameIconName => ({
+  'branch-expedition': 'map', 'pollution-control': 'pollution', 'sorting-line': 'materials',
+  'repair-bench': 'equipment', 'material-escort': 'value', 'hazard-isolation': 'boss',
+  'facility-defense': 'training', 'eco-mechanism': 'knowledge', 'npc-commission': 'theater',
+  'passport-hunt': 'museum', 'finale-operation': 'prototype',
+}[id] as GameIconName ?? 'training')
 
 interface Props { profile: PlayerProfile; onChange: (profile: PlayerProfile) => void }
 
@@ -17,9 +25,9 @@ export default function TrainingScreen({ profile, onChange }: Props) {
     <div className="mode-grid">{playModes.map((mode, index) => {
       const score = profile.modeMastery?.[mode.id] ?? 0
       return <article key={mode.id} className="mode-card pixel-panel">
-        <div className="mode-card-top"><span className="mode-number">{String(index + 1).padStart(2, '0')}</span><span className="mode-glyph">{mode.icon}</span>{score > 0 && <span className="mode-score"><Check /> {score}</span>}</div>
+        <div className="mode-card-top"><span className="mode-number">{String(index + 1).padStart(2, '0')}</span><span className="mode-glyph"><GameIcon name={modeIcon(mode.id)} size={64} /></span>{score > 0 && <span className="mode-score"><Check /> {score}</span>}</div>
         <small>{mode.shortName}</small><h2>{mode.name}</h2><p>{mode.fantasy}</p>
-        <div className="mode-card-actions"><button className="secondary-button" onClick={() => setShowDesign(mode)}><BookOpenCheck /> 详细规则</button><button className="primary-button" onClick={() => setSelected(mode)}>开始训练 <ChevronRight /></button></div>
+        <div className="mode-card-actions"><button className="secondary-button" onClick={() => setShowDesign(mode)}><GameIcon name="knowledge" size={34} /> 详细规则</button><button className="primary-button" onClick={() => setSelected(mode)}><GameIcon name="training" size={34} /> 开始训练 <ChevronRight /></button></div>
       </article>
     })}</div>
     {showDesign && <DesignModal mode={showDesign} onClose={() => setShowDesign(null)} />}
@@ -28,7 +36,7 @@ export default function TrainingScreen({ profile, onChange }: Props) {
 
 function DesignModal({ mode, onClose }: { mode: PlayModeDefinition; onClose: () => void }) {
   return <div className="mode-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="mode-design-title" onMouseDown={(event) => event.target === event.currentTarget && onClose()}><section className="mode-design pixel-panel">
-    <header><div><span className="eyebrow">PLAY MODE DESIGN / {mode.icon}</span><h2 id="mode-design-title">{mode.name}</h2></div><button onClick={onClose} aria-label="关闭">×</button></header>
+    <header><div><span className="eyebrow">PLAY MODE DESIGN / 系统训练档案</span><h2 id="mode-design-title">{mode.name}</h2></div><button onClick={onClose} aria-label="关闭">×</button></header>
     <p className="mode-fantasy">{mode.fantasy}</p>
     <div className="design-columns">
       <section><h3>核心循环</h3><ol>{mode.playerLoop.map((line) => <li key={line}>{line}</li>)}</ol></section>
@@ -75,9 +83,9 @@ function ModeRun({ mode, profile, onChange, onExit }: { mode: PlayModeDefinition
     <div className="mode-run-progress"><span style={{ width: `${(done ? 1 : (round + 1) / simulation.rounds.length) * 100}%` }} /></div>
     <section className="mode-meter-board">{simulation.meters.map((label, index) => <div key={label}><span>{label}</span><b>{meters[index]}</b><i><em style={{ width: `${meters[index]}%` }} /></i></div>)}</section>
     {!done ? <section className="simulation-stage">
-      <div className="simulation-object"><span>{mode.icon}</span><small>当前对象</small><b>{current.object}</b></div>
+      <div className="simulation-object"><span><GameIcon name={modeIcon(mode.id)} size={92} /></span><small>当前对象</small><b>{current.object}</b></div>
       <div className="simulation-copy"><span className="eyebrow">STAGE {round + 1} / DECISION</span><h1>{current.title}</h1><p>{current.situation}</p><div className="simulation-options">{current.options.map((option, index) => <button key={option.label} className={answer === null ? '' : index === current.best ? 'best' : answer === index ? 'chosen-wrong' : 'dim'} onClick={() => choose(index)}><span>{String.fromCharCode(65 + index)}</span><b>{option.label}</b></button>)}</div>
-        {answer !== null && <div className={`simulation-feedback ${answer === current.best ? 'best' : 'warning'}`}><div>{answer === current.best ? <ShieldCheck /> : <Sparkles />}<b>{answer === current.best ? '系统判断有效' : '这个选择产生了代价'}</b></div><p>{current.options[answer].feedback}</p><em>本轮原则 · {current.options[answer].principle}</em><button className="primary-button" onClick={next}>{round === simulation.rounds.length - 1 ? '完成并复盘' : '进入下一阶段'} <ChevronRight /></button></div>}
+        {answer !== null && <div className={`simulation-feedback ${answer === current.best ? 'best' : 'warning'}`}><div><GameIcon name={answer === current.best ? 'shield' : 'pollution'} size={46} /><b>{answer === current.best ? '系统判断有效' : '这个选择产生了代价'}</b></div><p>{current.options[answer].feedback}</p><em>本轮原则 · {current.options[answer].principle}</em><button className="primary-button" onClick={next}>{round === simulation.rounds.length - 1 ? '完成并复盘' : '进入下一阶段'} <ChevronRight /></button></div>}
       </div>
     </section> : <section className="mode-result pixel-panel"><div className="result-grade">{score >= 80 ? 'S' : score >= 65 ? 'A' : score >= 50 ? 'B' : 'C'}</div><span className="eyebrow">SYSTEM MASTERY</span><h1>{mode.shortName} · {score}分</h1><p>本次有 {correctChoices}/{simulation.rounds.length} 个阶段选择了兼顾安全、材料价值与系统后果的方案。仪表数值用于表达玩法资源，不再直接换算为成绩。</p><p>{mode.mastery}</p><div className="principle-log">{principles.map((principle, index) => <div key={`${principle}-${index}`}><Check /> <span>阶段 {index + 1}</span><b>{principle}</b></div>)}</div><div className="result-actions"><button className="secondary-button" onClick={restart}><RotateCcw /> 再次训练</button><button className="primary-button" onClick={onExit}>返回系统列表</button></div></section>}
   </div>

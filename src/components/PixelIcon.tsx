@@ -1,4 +1,4 @@
-import { assetUrl } from '../utils/assets'
+import GameIcon, { type GameIconName } from './GameIcon'
 
 interface PixelIconProps {
   name: string
@@ -8,5 +8,10 @@ interface PixelIconProps {
 }
 
 export default function PixelIcon({ name, alt = '', size = 28, className = '' }: PixelIconProps) {
-  return <img className={`pixel-icon ${className}`} src={assetUrl(`pixel-icons/${name}.png`)} alt={alt} width={size} height={size} />
+  const aliases: Record<string, GameIconName> = {
+    'home': 'home', 'map': 'map', 'shield-check': 'training', 'archive-box': 'museum',
+    'book': 'theater', 'sparkles': 'skills', 'user-avatar': 'profile', 'gift': 'exchange',
+    'settings-gear': 'settings', 'volume': 'volume', 'play': 'prototype',
+  }
+  return <GameIcon name={aliases[name] ?? 'prototype'} alt={alt} size={size} className={`pixel-icon ${className}`} />
 }

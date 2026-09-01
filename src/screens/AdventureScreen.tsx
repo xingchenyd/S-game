@@ -1,5 +1,6 @@
-import { ArrowLeft, Check, ChevronRight, Crosshair, Gauge, Heart, LockKeyhole, MapPinned, MousePointer2, Shield, ShieldAlert, Sparkles, Target, Users } from 'lucide-react'
+import { ArrowLeft, Check, ChevronRight, LockKeyhole, Users } from 'lucide-react'
 import { lazy, Suspense, useMemo, useState } from 'react'
+import GameIcon from '../components/GameIcon'
 import { adventures, buildCards, classificationChallenges } from '../data/content'
 import { getPlayMode, modeSimulations } from '../data/playModes'
 import type { BattleResult } from '../game/PhaserCombat'
@@ -102,12 +103,12 @@ export default function AdventureScreen({ profile, onChange, onImmersive }: Prop
 
   if (!selected) return <div className="adventure-select screen-enter">
     <header className="page-title"><div><span className="eyebrow">SHANGHAI CAMPAIGN / CHAPTER 01</span><h1>上海循环行动</h1><p>主线从虹桥撤展异常开始，沿城市材料流向追查污染源，最终在世博公众日完成闭环验证。</p></div><div className="campaign-progress"><b>{profile.campaignCompleted.length}/10</b><span>篇章节点</span></div></header>
-    <div className="adventure-mode-tabs"><button className={mapMode === 'campaign' ? 'active' : ''} onClick={() => setMapMode('campaign')}><MapPinned /> 上海主线</button><button className={mapMode === 'routes' ? 'active' : ''} onClick={() => setMapMode('routes')}><Sparkles /> 自由行动</button></div>
+    <div className="adventure-mode-tabs"><button className={mapMode === 'campaign' ? 'active' : ''} onClick={() => setMapMode('campaign')}><GameIcon name="map" size={38} /> 上海主线</button><button className={mapMode === 'routes' ? 'active' : ''} onClick={() => setMapMode('routes')}><GameIcon name="prototype" size={38} /> 自由行动</button></div>
     <div className="difficulty-bar pixel-panel"><b>行动难度</b>{(Object.keys(difficultyCopy) as Difficulty[]).map((item) => <button key={item} className={difficulty === item ? 'active' : ''} onClick={() => setDifficulty(item)}><strong>{difficultyTuning[item].name}</strong><small>{difficultyCopy[item]}</small><em>奖励 ×{difficultyTuning[item].reward}</em></button>)}</div>
     {mapMode === 'campaign' && <section className="campaign-map pixel-panel"><div className="campaign-line" />{shanghaiCampaign.map((mission) => { const unlocked = isMissionUnlocked(mission, profile.campaignCompleted); const completed = profile.campaignCompleted.includes(mission.id); const route = adventures.find((item) => item.id === mission.routeId); return <button key={mission.id} className={`campaign-node ${completed ? 'completed' : unlocked ? 'unlocked' : 'locked'}`} disabled={!unlocked || !route} onClick={() => { if (route) { setSelectedMission(mission); setSelected(route) } }} style={{ '--node-accent': route?.accent } as React.CSSProperties}><span>{completed ? <Check /> : unlocked ? String(mission.order).padStart(2, '0') : <LockKeyhole />}</span><div><small>{mission.location} · {mission.kind.toUpperCase()}</small><b>{mission.title}</b><em>{mission.subtitle}</em><p>{mission.summary}</p><u><Users /> {mission.cast.join(' · ')}</u><strong>{mission.reward}</strong></div></button> })}</section>}
     {mapMode === 'routes' && <div className="adventure-grid">{adventures.map((item, index) => <button key={item.id} className={`adventure-card ${!item.available ? 'locked' : ''}`} style={{ '--accent': item.accent } as React.CSSProperties} onClick={() => item.available && setSelected(item)} disabled={!item.available}>
       <img src={item.background} alt="" /><span className="adventure-shade" /><span className="route-number">{String(index + 1).padStart(2, '0')}</span>{!item.available && <span className="locked-chip"><LockKeyhole /> 筹备中</span>}
-      <span className="adventure-info"><span className="eyebrow">{item.location}</span><b>{item.name}</b><small>{item.briefing}</small><span className="route-card-modes">{item.modes?.map((mode) => <em key={mode}>{getPlayMode(mode)?.shortName}</em>)}</span><span className="boss-line"><ShieldAlert /> BOSS · {item.boss}</span></span><ChevronRight className="route-arrow" />
+      <span className="adventure-info"><span className="eyebrow">{item.location}</span><b>{item.name}</b><small>{item.briefing}</small><span className="route-card-modes">{item.modes?.map((mode) => <em key={mode}>{getPlayMode(mode)?.shortName}</em>)}</span><span className="boss-line"><GameIcon name="boss" size={36} /> BOSS · {item.boss}</span></span><ChevronRight className="route-arrow" />
     </button>)}</div>}
   </div>
 
@@ -129,36 +130,36 @@ export default function AdventureScreen({ profile, onChange, onImmersive }: Prop
     <header className="run-hud">
       <button onClick={reset} aria-label="退出本局"><ArrowLeft /></button>
       <div className="run-title"><small>{selected.location}</small><b>{selected.name}</b></div>
-      <div className="run-progress"><div><span style={{ width: `${metrics.stage / metrics.totalStages * 100}%` }} /></div><small>本局进度 {metrics.stage}/{metrics.totalStages}</small></div>
+      <div className="run-progress"><div><span style={{ width: `${metrics.stage / metrics.totalStages * 100}%` }} /></div><small><b>行动进度</b><em>{Math.round(metrics.stage / metrics.totalStages * 100)}%</em><span>{metrics.stage}/{metrics.totalStages} 节点</span></small></div>
       <div className="survival-bars">
-        <div className="survival-bar health"><Heart /><span><small>行动生命</small><i><em style={{ width: `${Math.max(0, metrics.hp / metrics.maxHp * 100)}%` }} /></i></span><b>{Math.ceil(metrics.hp)}</b></div>
-        <div className="survival-bar shield"><Shield /><span><small>循环护盾</small><i><em style={{ width: `${Math.max(0, (metrics.shield ?? 0) / Math.max(1, metrics.maxShield ?? 1) * 100)}%` }} /></i></span><b>{Math.ceil(metrics.shield ?? 0)}</b></div>
+        <div className="survival-bar health"><GameIcon name="health" size={38} /><span><small>行动生命</small><i><em style={{ width: `${Math.max(0, metrics.hp / metrics.maxHp * 100)}%` }} /></i></span><b>{Math.ceil(metrics.hp)}</b></div>
+        <div className="survival-bar shield"><GameIcon name="shield" size={38} /><span><small>循环护盾</small><i><em style={{ width: `${Math.max(0, (metrics.shield ?? 0) / Math.max(1, metrics.maxShield ?? 1) * 100)}%` }} /></i></span><b>{Math.ceil(metrics.shield ?? 0)}</b></div>
       </div>
-      <div className="hud-stat pollution"><Gauge /> <span>污染 {metrics.pollution}%</span></div>
-      <div className="hud-stat value"><Sparkles /> <span>价值 {metrics.value}</span></div>
+      <div className="hud-stat pollution"><GameIcon name="pollution" size={34} /> <span>污染 <b>{metrics.pollution}%</b></span></div>
+      <div className="hud-stat value"><GameIcon name="value" size={34} /> <span>价值 <b>{metrics.value}</b></span></div>
     </header>
 
     {phase === 'room' && selectedMission && <ExplorationRoom mission={selectedMission} adventure={selected} previewTargets={profile.unlockedSkills.includes('system-scan')} onComplete={() => setPhase('combat')} />}
 
     {(phase === 'combat' || phase === 'boss') && <>
-      <div className="objective-chip"><Target /> <span>{phase === 'boss' ? `击破 ${selected.boss} 的污染外壳` : '稳定区域，净化游离污染体'}</span><b>COMBO {metrics.combo} · 终结 {metrics.finisher}%</b></div>
-      {phase === 'boss' && Boolean(metrics.bossMaxHp) && <div className="boss-hud"><span><ShieldAlert /><small>污染外壳 · 阶段作战</small><b>{selected.boss}</b></span><div><i style={{ width: `${Math.max(0, (metrics.bossHp ?? 0) / Math.max(1, metrics.bossMaxHp ?? 1) * 100)}%` }} /></div><em>{Math.ceil(metrics.bossHp ?? 0)} / {metrics.bossMaxHp}</em></div>}
+      <div className="objective-chip"><GameIcon name={phase === 'boss' ? 'boss' : 'radar'} size={38} /> <span>{phase === 'boss' ? `击破 ${selected.boss} 的污染外壳` : '稳定区域，净化游离污染体'}</span><b>连击 {metrics.combo} · 终结 {metrics.finisher}%</b></div>
+      {phase === 'boss' && Boolean(metrics.bossMaxHp) && <div className="boss-hud"><span><GameIcon name="boss" size={44} /><small>污染外壳 · 阶段作战</small><b>{selected.boss}</b></span><div><i style={{ width: `${Math.max(0, (metrics.bossHp ?? 0) / Math.max(1, metrics.bossMaxHp ?? 1) * 100)}%` }} /></div><em>{Math.ceil(metrics.bossHp ?? 0)} / {metrics.bossMaxHp}</em></div>}
       <div className="combat-corner-ui">
-        <div className="combat-minimap" aria-label="战斗雷达"><header><Crosshair /><span>区域雷达</span></header><div>{metrics.radar?.map((enemy, index) => <i key={`${index}-${enemy.x}-${enemy.y}`} className={enemy.boss ? 'boss' : ''} style={{ left: `${enemy.x}%`, top: `${enemy.y}%` }} />)}<b style={{ left: `${metrics.playerX ?? 50}%`, top: `${metrics.playerY ?? 50}%` }} /></div></div>
-        <div className={`active-attack-guide ${weaponMode.tone}`}><MousePointer2 /><span><small>主动武器 · 主要伤害</small><b>{weaponMode.name}</b><em>{weaponMode.detail}</em></span></div>
+        <div className="combat-minimap" aria-label="战斗雷达"><header><GameIcon name="radar" size={30} /><span>区域雷达</span></header><div>{metrics.radar?.map((enemy, index) => <i key={`${index}-${enemy.x}-${enemy.y}`} className={enemy.boss ? 'boss' : ''} style={{ left: `${enemy.x}%`, top: `${enemy.y}%` }} />)}<b style={{ left: `${metrics.playerX ?? 50}%`, top: `${metrics.playerY ?? 50}%` }} /></div></div>
+        <div className={`active-attack-guide ${weaponMode.tone}`}><GameIcon name="attack" size={44} /><span><small>主动武器 · 主要伤害</small><b>{weaponMode.name}</b><em>{weaponMode.detail}</em></span></div>
       </div>
       <div className="combat-buff-stack">{metrics.activeBuffs?.map((buff) => <div key={buff.id} className={buff.tone}><b>{buff.label}</b><span>{buff.remaining}s</span></div>)}{Boolean(metrics.drops) && <div className="drops"><b>场内掉落物</b><span>{metrics.drops}</span></div>}</div>
       <div className="combat-skill-tray" aria-label="主动技能状态">
-        <div className={(metrics.skillCooldowns?.pulse ?? 0) <= 0 ? 'ready' : ''}><kbd>Q</kbd><span><b>定向脉冲</b><small>{(metrics.skillCooldowns?.pulse ?? 0) <= 0 ? '可释放' : `${metrics.skillCooldowns?.pulse?.toFixed(1)}s`}</small></span><i><em style={{ width: `${Math.max(0, 100 - (metrics.skillCooldowns?.pulse ?? 0) / 6.5 * 100)}%` }} /></i></div>
-        <div className="ready"><kbd>E</kbd><span><b>蓄力工具</b><small>按住后释放</small></span><i><em style={{ width: '100%' }} /></i></div>
-        <div className={(metrics.skillCooldowns?.dash ?? 0) <= 0 ? 'ready' : ''}><kbd>␣</kbd><span><b>无敌冲刺</b><small>{(metrics.skillCooldowns?.dash ?? 0) <= 0 ? '可释放' : `${metrics.skillCooldowns?.dash?.toFixed(1)}s`}</small></span><i><em style={{ width: `${Math.max(0, 100 - (metrics.skillCooldowns?.dash ?? 0) / 1.8 * 100)}%` }} /></i></div>
-        <div className={metrics.finisher >= 100 ? 'ready ultimate' : 'ultimate'}><kbd>R</kbd><span><b>原型终结</b><small>{metrics.finisher}%</small></span><i><em style={{ width: `${metrics.finisher}%` }} /></i></div>
+        <div className={(metrics.skillCooldowns?.pulse ?? 0) <= 0 ? 'ready' : ''}><GameIcon name="pulse" size={42} /><kbd>Q</kbd><span><b>定向脉冲</b><small>{(metrics.skillCooldowns?.pulse ?? 0) <= 0 ? '可释放' : `${metrics.skillCooldowns?.pulse?.toFixed(1)}s`}</small></span><i><em style={{ width: `${Math.max(0, 100 - (metrics.skillCooldowns?.pulse ?? 0) / 6.5 * 100)}%` }} /></i></div>
+        <div className="ready"><GameIcon name="charge" size={42} /><kbd>E</kbd><span><b>蓄力工具</b><small>按住后释放</small></span><i><em style={{ width: '100%' }} /></i></div>
+        <div className={(metrics.skillCooldowns?.dash ?? 0) <= 0 ? 'ready' : ''}><GameIcon name="dash" size={42} /><kbd>空格</kbd><span><b>无敌冲刺</b><small>{(metrics.skillCooldowns?.dash ?? 0) <= 0 ? '可释放' : `${metrics.skillCooldowns?.dash?.toFixed(1)}s`}</small></span><i><em style={{ width: `${Math.max(0, 100 - (metrics.skillCooldowns?.dash ?? 0) / 1.8 * 100)}%` }} /></i></div>
+        <div className={metrics.finisher >= 100 ? 'ready ultimate' : 'ultimate'}><GameIcon name="ultimate" size={42} /><kbd>R</kbd><span><b>原型终结</b><small>{metrics.finisher}%</small></span><i><em style={{ width: `${metrics.finisher}%` }} /></i></div>
       </div>
       <Suspense fallback={<div className="loading-screen"><span /><b>正在装配精细2D战斗场景…</b></div>}><PhaserCombat adventure={selected} difficulty={difficulty} boss={phase === 'boss'} builds={builds} weaponId={profile.equipped.weapon} combatStats={combatStats} screenShake={profile.settings.screenShake} initialPollution={metrics.pollution} initialValue={metrics.value} finisherCharge={metrics.finisher} pulseCooldown={metrics.skillCooldowns?.pulse} dashCooldown={metrics.skillCooldowns?.dash} onHud={(value) => setMetrics((m) => ({ ...m, ...value }))} onComplete={battleDone} onDefeat={() => { setPhase('defeat'); onImmersive(false) }} /></Suspense>
     </>}
 
     {phase === 'classify' && <section className="decision-overlay">
-      <div className="decision-card pixel-panel"><span className="eyebrow">系统节点 {systemIndex + 1}/{selected.modes?.length ?? 1} · {modeDesign?.name ?? '材料判断'}</span><div className="item-orb">{modeDesign?.icon ?? challenge.icon}</div><h2>{modeRound?.object ?? challenge.item}</h2><p>{modeRound?.situation ?? challenge.prompt}</p>
+      <div className="decision-card pixel-panel"><span className="eyebrow">系统节点 {systemIndex + 1}/{selected.modes?.length ?? 1} · {modeDesign?.name ?? '材料判断'}</span><div className="item-orb"><GameIcon name={selected.wasteType === 'electronic' ? 'energy' : selected.wasteType === 'plastic' ? 'materials' : selected.wasteType === 'paper' ? 'knowledge' : 'equipment'} size={104} /></div><h2>{modeRound?.object ?? challenge.item}</h2><p>{modeRound?.situation ?? challenge.prompt}</p>
         <div className="decision-options">{(modeRound?.options.map((option) => option.label) ?? challenge.options).map((option, index) => <button key={option} className={answer === null ? '' : index === (modeRound?.best ?? challenge.answer) ? 'correct' : answer === index ? 'wrong' : 'muted'} onClick={() => submitAnswer(index)}>{String.fromCharCode(65 + index)}. {option}</button>)}</div>
         {answer !== null && <div className={`answer-feedback ${correct ? 'correct' : 'wrong'}`}><b>{correct ? '系统判断有效：后续路线被改善' : '本次选择产生了系统代价'}</b><p>{modeRound?.options[answer].feedback ?? challenge.explain}</p><em>{modeRound ? `教育原则 · ${modeRound.options[answer].principle}` : ''}</em><button className="primary-button" onClick={advanceSystem}>{systemIndex >= (selected.modes?.length ?? 1) - 1 ? '完成系统节点，进入构筑' : '进入下一套路线玩法'} <ChevronRight /></button></div>}
       </div>

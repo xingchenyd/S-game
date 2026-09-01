@@ -1,0 +1,159 @@
+/* UI V4 — generated game chrome, readable Chinese type, and dense action HUD. */
+:root {
+  --game-font: "Microsoft YaHei UI", "Noto Sans SC", "Source Han Sans SC", "PingFang SC", sans-serif;
+  --game-display: "Microsoft YaHei UI", "STHeiti", "SimHei", "Noto Sans SC", sans-serif;
+}
+
+html { font-size: 17px; }
+body, button, input, select, textarea { font-family: var(--game-font); font-weight: 700; }
+body { letter-spacing: .015em; }
+h1, h2, h3, strong, b { font-family: var(--game-display); font-weight: 900; }
+h1, h2 { letter-spacing: -.025em; text-wrap: balance; }
+p { font-weight: 650; }
+small { font-weight: 750; }
+
+.game-icon { flex: 0 0 auto; object-fit: contain; filter: drop-shadow(0 2px 1px #0009); pointer-events: none; user-select: none; }
+.pixel-icon, .game-icon { image-rendering: auto; }
+.eyebrow { font-family: var(--game-font); font-size: 13px; font-weight: 900; line-height: 1.3; letter-spacing: .12em; text-shadow: 0 1px 0 #000; }
+
+.primary-button, .secondary-button, .danger-button, .primary-action, .secondary-action {
+  min-height: 58px; padding: 11px 24px; border: 12px solid transparent !important;
+  color: #f8ffff !important; background: #081820 !important; font-size: 16px; font-weight: 900;
+  letter-spacing: .055em; text-shadow: 0 2px 2px #000; box-shadow: 0 7px 15px #0007 !important;
+}
+.primary-button, .primary-action { border-image: url('../../public/art/ui-v4/chrome/primary-button.webp') 28% fill / 16px / 0 stretch !important; }
+.secondary-button, .secondary-action { border-image: url('../../public/art/ui-v4/chrome/secondary-button.webp') 28% fill / 16px / 0 stretch !important; }
+.danger-button { border-image: url('../../public/art/ui-v4/chrome/danger-button.webp') 28% fill / 16px / 0 stretch !important; }
+.primary-button:hover, .secondary-button:hover, .danger-button:hover { filter: brightness(1.15) saturate(1.18); }
+.primary-button .game-icon, .secondary-button .game-icon { margin: -10px 0; }
+
+.pixel-panel, .panel {
+  border: 11px solid transparent;
+  border-image: url('../../public/art/ui-v4/chrome/content-panel.webp') 19% fill / 18px / 0 stretch;
+}
+.page-title h1 { font-size: clamp(34px, 4vw, 58px); line-height: 1.08; }
+.page-title p { font-size: 16px; line-height: 1.75; }
+.page-title small, .page-title span { font-size: 13px; }
+
+.top-rail { height: 70px; padding-top: 2px; }
+.game-shell { padding-top: 88px; }
+.brand-chip { font-size: 17px; letter-spacing: .04em; text-shadow: 0 2px 0 #000; }
+.brand-mark { width: 42px; height: 42px; font-size: 21px; }
+.player-chip { font-size: 15px; }
+.level-badge, .currency { font-family: var(--game-font); font-size: 13px; font-weight: 900; }
+
+.dock { gap: 4px; padding: 7px 9px; border-radius: 18px; border-color: #1a414b; background: #06151bf4; }
+.dock button { width: 82px; min-height: 67px; gap: 1px; border-radius: 12px; font-size: 13px; font-weight: 900; text-shadow: 0 2px 2px #000; }
+.dock .pixel-icon { width: 42px; height: 42px; margin-top: -5px; }
+.dock button.active { color: white; background: radial-gradient(circle at 50% 18%, color-mix(in srgb,var(--shell-accent) 46%,transparent),#102a32 72%); box-shadow: inset 0 -4px 0 var(--shell-accent), 0 0 18px color-mix(in srgb,var(--shell-accent) 23%,transparent); }
+.system-rail > button { min-width: 78px; height: 59px; border-radius: 12px; background: #0c232a; }
+.system-rail span { font-size: 13px; font-weight: 900; }
+
+.title-kicker { font-family: var(--game-font); font-size: 15px; }
+.title-lockup h1 { font-family: var(--game-display); font-weight: 900; letter-spacing: -.055em; text-shadow: 0 5px 0 #000, 0 0 28px #000; }
+.title-lockup p { font-size: clamp(17px, 1.8vw, 23px); font-weight: 800; text-shadow: 0 2px 3px #000; }
+.login-card { border: 13px solid transparent; border-image: url('../../public/art/ui-v4/chrome/content-panel.webp') 19% fill / 22px / 0 stretch; background: #071820e8; }
+.login-card > label { font-size: 17px; }
+.name-field { height: 64px; font-size: 17px; }
+.name-field input { font-size: 18px; font-weight: 900; }
+.recent-users > span, .login-card small { font-size: 13px; }
+.recent-users button { min-height: 48px; font-size: 15px; }
+.carousel-arrow { width: 58px; height: 68px; border: 9px solid transparent; border-image: url('../../public/art/ui-v4/chrome/secondary-button.webp') 28% fill / 13px / 0 stretch; }
+.control-arrow { display: block; width: 18px; height: 18px; border-top: 6px solid currentColor; border-right: 6px solid currentColor; transform: rotate(45deg); filter: drop-shadow(0 2px 1px #000); }
+.carousel-arrow.prev .control-arrow { transform: rotate(-135deg); }
+
+.facility-sign small { font-size: 11px; font-weight: 900; }
+.facility-sign b { font-size: 16px; text-shadow: 0 2px 2px #000; }
+.facility-sign em { font-size: 11px; font-weight: 750; }
+.facility-beacon { width: 52px; height: 52px; border: 0; background: transparent; box-shadow: none; }
+.facility-beacon .game-icon { width: 52px; height: 52px; }
+.world-identity b { font-size: 18px; text-shadow: 0 2px 2px #000; }
+.world-identity small { font-size: 12px; font-weight: 800; }
+.world-objective small { font-family: var(--game-font); font-size: 11px; }
+.world-objective b { font-size: 15px; }
+.world-currency { font-size: 13px; }.world-currency b { font-size: 22px; }
+.world-interaction small { font-size: 12px; }.world-interaction b { font-size: 16px; }
+.world-interaction { border: 10px solid transparent; border-image: url('../../public/art/ui-v4/chrome/tooltip.webp') 22% fill / 16px / 0 stretch; }
+.world-interaction button { min-height: 44px; font-size: 15px; }
+.world-notice { font-size: 15px; }
+.base-touch-controls button, .dpad button { display: grid; place-items: center; border-radius: 16px; }
+.base-touch-controls .up .control-arrow, .dpad .up .control-arrow { transform: rotate(-45deg); }
+.base-touch-controls .left .control-arrow, .dpad .left .control-arrow { transform: rotate(-135deg); }
+.base-touch-controls .down .control-arrow, .dpad .down .control-arrow { transform: rotate(135deg); }
+.base-touch-controls .right .control-arrow, .dpad .right .control-arrow { transform: rotate(45deg); }
+.base-interact-button span { font-size: 13px; text-shadow: 0 2px 2px #000; }
+
+.adventure-mode-tabs button, .slot-tabs button, .museum-tabs button, .profile-tabs button { min-height: 58px; font-size: 15px; font-weight: 900; }
+.adventure-mode-tabs .game-icon { margin: -8px 2px; }
+.difficulty-bar > b { font-size: 18px; }.difficulty-bar button strong { font-size: 16px; }.difficulty-bar button small { font-size: 12px; line-height: 1.4; }.difficulty-bar button em { font-size: 12px; }
+.campaign-node b { font-size: 19px; }.campaign-node p { font-size: 14px; line-height: 1.55; }.campaign-node small, .campaign-node em, .campaign-node u { font-size: 12px; }
+.adventure-info > b { font-size: 22px; }.adventure-info > small { font-size: 13px; line-height: 1.55; }
+
+/* Dense combat HUD rebuilt around generated badges and framed progress. */
+.run-hud {
+  height: 106px; grid-template-columns: 48px minmax(150px,.75fr) minmax(230px,1.25fr) minmax(240px,1fr) auto auto;
+  gap: 13px; padding: 10px 16px; border-bottom: 0;
+  background: linear-gradient(180deg,#07151cf5,#081c24f2); box-shadow: 0 7px 22px #000b;
+}
+.run-hud::before { content:""; position:absolute; inset:3px 6px 4px; pointer-events:none; border:14px solid transparent; border-image:url('../../public/art/ui-v4/chrome/hud-panel.webp') 24% fill / 18px / 0 stretch; opacity:.82; }
+.run-hud > * { position: relative; z-index: 1; }
+.run-hud > button { width:46px;height:52px;border:8px solid transparent;border-image:url('../../public/art/ui-v4/chrome/secondary-button.webp') 28% fill / 12px / 0 stretch; }
+.run-title small { font-size: 11px; font-weight: 850; }.run-title b { font-size: 16px; line-height: 1.25; text-shadow: 0 2px 2px #000; }
+.run-progress { gap: 6px; }
+.run-progress > div { height: 20px; padding: 3px; border: 7px solid transparent; border-image: url('../../public/art/ui-v4/chrome/progress-frame.webp') 30% fill / 10px / 0 stretch; background:#051219; }
+.run-progress > div span { height: 8px; border-radius: 2px; background: repeating-linear-gradient(90deg,var(--run-accent) 0 24px,var(--run-accent-2) 24px 43px,#ffffff 43px 46px); animation: progress-flow 1.8s linear infinite; }
+.run-progress > div span::after { top:-2px;height:12px; }
+.run-progress small { display:flex;align-items:center;justify-content:center;gap:7px;font-family:var(--game-font);font-size:11px;color:#b9d5da; }
+.run-progress small b { color:white;font-size:12px; }.run-progress small em { color:var(--run-accent);font-style:normal;font-size:14px; }.run-progress small span { color:#91adb3; }
+.survival-bars { gap: 7px; }.survival-bar { min-width:240px;grid-template-columns:38px 1fr 38px;gap:7px; }.survival-bar .game-icon { width:38px;height:38px;margin:-7px 0; }
+.survival-bar small { font-family:var(--game-font);font-size:10px;font-weight:900;letter-spacing:.06em; }.survival-bar i { height:12px;border-width:2px; }.survival-bar b { font-family:var(--game-font);font-size:13px; }
+.hud-stat { min-height:54px;padding:5px 10px;font-family:var(--game-font);font-size:12px;font-weight:900; }.hud-stat .game-icon { margin:-6px 0; }.hud-stat span { display:grid; }.hud-stat span b { font-size:15px; }
+.objective-chip { top:121px;min-width:500px;min-height:54px;padding:4px 15px 4px 5px;border:9px solid transparent;border-image:url('../../public/art/ui-v4/chrome/tooltip.webp') 22% fill / 15px / 0 stretch;font-size:14px; }
+.objective-chip .game-icon { margin:-12px 0; }.objective-chip b { font-size:12px; }
+.boss-hud { top:178px; width:min(620px,calc(100% - 40px)); padding:9px 16px 13px;border:12px solid transparent;border-image:url('../../public/art/ui-v4/chrome/boss-frame.webp') 26% fill / 18px / 0 stretch;background:#220b12e8; }
+.boss-hud small { font-family:var(--game-font);font-size:10px; }.boss-hud b { font-size:18px; }.boss-hud > div { height:16px; }.boss-hud > span { grid-template-columns:46px 1fr; }.boss-hud .game-icon { grid-row:1/3;margin:-8px 0; }
+.boss-hud > em { font-family:var(--game-font);font-size:12px; }
+.combat-stage { height:calc(100vh - 164px);height:calc(100dvh - 164px); }
+.combat-corner-ui { bottom:92px;width:200px; }.combat-minimap { border:10px solid transparent;border-image:url('../../public/art/ui-v4/chrome/tooltip.webp') 22% fill / 15px / 0 stretch; }.combat-minimap header { font-family:var(--game-font);font-size:11px; }.combat-minimap header .game-icon { margin:-8px 0; }
+.active-attack-guide { min-height:70px;border:10px solid transparent;border-image:url('../../public/art/ui-v4/chrome/tooltip.webp') 22% fill / 15px / 0 stretch; }.active-attack-guide small { font-family:var(--game-font);font-size:9px; }.active-attack-guide b { font-size:13px; }.active-attack-guide em { font-size:10px; }
+.combat-skill-tray { grid-template-columns:repeat(4,minmax(132px,1fr));gap:8px;width:min(680px,calc(100% - 470px)); }
+.combat-skill-tray > div { min-height:66px;grid-template-columns:44px 30px 1fr;gap:5px;padding:5px 8px;border:9px solid transparent;border-image:url('../../public/art/ui-v4/chrome/skill-bezel.webp') 28% fill / 12px / 0 stretch;background:#06151be8; }
+.combat-skill-tray .game-icon { width:44px;height:44px;margin:-9px 0; }.combat-skill-tray kbd { width:28px;height:32px;font-family:var(--game-font);font-size:11px; }.combat-skill-tray b { font-size:12px; }.combat-skill-tray small { font-family:var(--game-font);font-size:9px; }.combat-skill-tray i { height:5px; }
+.combat-buff-stack > div { min-width:150px;font-family:var(--game-font);font-size:11px; }
+.touch-controls button { font-family:var(--game-font); }.action-pad { grid-template-columns:repeat(2,84px);gap:9px; }.action-pad button { width:84px;height:84px;display:grid;grid-template-rows:42px auto auto;place-items:center;font-size:12px;line-height:1; }.action-pad button .game-icon { width:42px;height:42px;margin:-9px 0; }.action-pad button span { font-weight:900;text-shadow:0 2px 2px #000; }.action-pad small { font-size:9px;font-weight:850; }
+.dpad button { border-radius:16px; }.dpad .control-arrow { width:16px;height:16px;border-width:5px; }
+
+.decision-card h2, .build-panel h2 { font-size:clamp(30px,4vw,46px); }.decision-card > p,.build-grid button p { font-size:16px;line-height:1.75; }.decision-options button { min-height:64px;font-size:16px;line-height:1.45; }.answer-feedback b { font-size:18px; }.answer-feedback p { font-size:15px; }
+.item-orb { width:118px;height:118px;font-size:58px; }.build-grid button b { font-size:29px; }.build-grid button small { font-size:13px; }
+.result-screen > p { font-size:17px; }.result-grid b { font-size:29px; }.result-grid span,.prototype-ticket span { font-size:12px; }
+
+@keyframes progress-flow { to { background-position-x:46px; } }
+
+@media (max-width: 1000px) {
+  html { font-size:16px; }
+  .dock button { width:68px; }.dock .pixel-icon { width:38px;height:38px; }
+  .run-hud { height:126px;grid-template-columns:42px 1fr auto auto;padding:8px 10px;gap:7px; }
+  .run-title { grid-column:2/5; }.run-progress { grid-column:1/3; }.survival-bars { grid-column:3/5;grid-row:2; }.survival-bar { min-width:190px; }
+  .hud-stat { display:none; }.objective-chip { top:139px; }.boss-hud { top:197px; }.combat-stage { height:calc(100dvh - 184px); }
+}
+
+@media (max-width: 680px) {
+  html { font-size:15px; }
+  .game-shell { padding:78px 14px calc(98px + var(--safe-bottom)); }.top-rail { height:62px; }
+  .player-chip strong { display:none; }.level-badge,.currency { font-size:11px; }
+  .dock { width:calc(100% - 12px);bottom:calc(5px + var(--safe-bottom));padding:4px;overflow-x:auto;justify-content:flex-start; }
+  .dock button { min-width:57px;min-height:61px;font-size:11px; }.dock .pixel-icon { width:34px;height:34px; }
+  .system-rail { right:8px;bottom:calc(73px + var(--safe-bottom)); }.system-rail > button { min-width:52px;height:48px; }.system-rail span { display:none; }
+  .title-lockup h1 { font-size:clamp(46px,13vw,72px); }.login-panel { width:calc(100% - 24px); }.login-card { padding:17px; }
+  .world-hud { grid-template-columns:1fr auto; }.world-objective { display:none; }.world-identity b { font-size:15px; }.world-identity small { font-size:10px; }
+  .world-interaction { left:50%;right:auto;bottom:calc(156px + var(--safe-bottom));width:min(286px,calc(100% - 28px));max-width:none;transform:translateX(-50%);min-height:58px; }.world-interaction b { font-size:13px; }.world-interaction small { display:block;font-size:10px; }
+  .facility-sign b { font-size:14px; }.facility-sign small { font-size:10px; }
+  .run-hud { height:138px;grid-template-columns:36px 1fr auto;padding:6px; }.run-title { grid-column:2/4; }.run-title small { font-size:9px; }.run-title b { font-size:14px; }
+  .run-progress { grid-column:1/3; }.run-progress > div { height:18px; }.run-progress small { font-size:9px;gap:4px; }.run-progress small b { font-size:10px; }.run-progress small em { font-size:12px; }
+  .survival-bars { grid-column:3;min-width:128px; }.survival-bar { min-width:128px;grid-template-columns:27px 1fr 25px;gap:3px; }.survival-bar .game-icon { width:28px;height:28px; }.survival-bar small { display:none; }.survival-bar b { font-size:10px; }
+  .objective-chip { top:148px;width:calc(100% - 14px);min-width:0;min-height:48px;font-size:11px; }.objective-chip .game-icon { width:32px;height:32px; }.objective-chip b { font-size:9px; }
+  .boss-hud { top:201px;padding:6px 10px 10px; }.boss-hud b { font-size:14px; }.boss-hud small { font-size:8px; }
+  .combat-stage { height:auto;min-height:calc(56.25vw + 176px);padding-bottom:176px; }.touch-controls { top:clamp(210px,56.25vw,260px);height:176px; }
+  .combat-corner-ui { top:202px; }.combat-buff-stack { top:202px; }.action-pad { grid-template-columns:repeat(2,76px); }.action-pad button { width:76px;height:76px;grid-template-rows:36px auto auto; }.action-pad button .game-icon { width:38px;height:38px; }
+  .decision-options button { font-size:15px; }.decision-card > p { font-size:15px; }
+}

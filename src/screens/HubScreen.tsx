@@ -1,5 +1,5 @@
-import { Footprints, MapPin, MousePointer2, Navigation, Sparkles } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from 'react'
+import GameIcon from '../components/GameIcon'
 import type { PlayerProfile, Screen } from '../types'
 import { assetUrl } from '../utils/assets'
 
@@ -132,7 +132,7 @@ export default function HubScreen({ profile, onNavigate }: Props) {
           const close = nearest?.id === facility.id
           return <button key={facility.id} className={`world-facility ${close ? 'is-near' : ''} ${facility.image ? 'has-building' : ''} ${facility.align === 'left' ? 'align-left' : ''}`} style={{ left: facility.position.x, top: facility.position.y, '--facility-tone': facility.tone } as CSSProperties} onClick={() => chooseFacility(facility)} aria-label={`${facility.name}：${facility.description}`}>
             {facility.image && <img src={assetUrl(facility.image)} alt="" />}
-            <span className="facility-beacon"><MapPin /></span>
+            <span className="facility-beacon"><GameIcon name={facility.id === 'adventure' ? 'map' : facility.id === 'training' ? 'training' : facility.id === 'museum' ? 'museum' : facility.id === 'theater' ? 'theater' : facility.id === 'skills' ? 'skills' : facility.id === 'equipment' ? 'equipment' : facility.id === 'exchange' ? 'exchange' : 'profile'} size={44} /></span>
             <span className="facility-sign"><small>{facility.short}</small><b>{facility.name}</b><em>{close ? '可交互' : facility.description}</em></span>
           </button>
         })}
@@ -141,17 +141,17 @@ export default function HubScreen({ profile, onNavigate }: Props) {
 
       <header className="world-hud">
         <div className="world-identity"><span>LV.{profile.level}</span><b>{profile.username}</b><small>循环基地 · 上海站</small></div>
-        <div className="world-objective"><Sparkles /><span><small>当前行动</small><b>前往城市行动门，调查新的污染外壳</b></span></div>
+        <div className="world-objective"><GameIcon name="prototype" size={42} /><span><small>当前行动</small><b>前往城市行动门，调查新的污染外壳</b></span></div>
         <div className="world-currency">稳定原型 <b>{profile.prototypes.length}</b><span>◈ {profile.points}</span></div>
       </header>
 
       <div className={`world-interaction ${nearest ? 'is-ready' : ''}`}>
-        {nearest ? <><span className="interaction-key">E</span><span><small>{nearest.description}</small><b>进入 {nearest.name}</b></span><button onClick={() => onNavigate(nearest.id)}>交互</button></> : <><Footprints /><span><small>WASD / 方向键移动 · 点击设施可自动寻路</small><b>在基地中寻找功能区</b></span></>}
+        {nearest ? <><span className="interaction-key">E</span><span><small>{nearest.description}</small><b>进入 {nearest.name}</b></span><button onClick={() => onNavigate(nearest.id)}>交互</button></> : <><GameIcon name="map" size={36} /><span><small>WASD / 方向键移动 · 点击设施可自动寻路</small><b>在基地中寻找功能区</b></span></>}
       </div>
-      {notice && <div className="world-notice"><Navigation />{notice}</div>}
+      {notice && <div className="world-notice"><GameIcon name="map" size={32} />{notice}</div>}
 
-      <div className="base-touch-controls" aria-label="基地移动控制"><button {...holdDirection('arrowup')} className="up" aria-label="向上移动">▲</button><button {...holdDirection('arrowleft')} className="left" aria-label="向左移动">◀</button><button {...holdDirection('arrowdown')} className="down" aria-label="向下移动">▼</button><button {...holdDirection('arrowright')} className="right" aria-label="向右移动">▶</button></div>
-      <button className={`base-interact-button ${nearest ? 'is-ready' : ''}`} disabled={!nearest} onClick={() => nearest && onNavigate(nearest.id)}><MousePointer2 /><span>{nearest ? '进入' : '靠近设施'}</span></button>
+      <div className="base-touch-controls" aria-label="基地移动控制"><button {...holdDirection('arrowup')} className="up" aria-label="向上移动"><span className="control-arrow" /></button><button {...holdDirection('arrowleft')} className="left" aria-label="向左移动"><span className="control-arrow" /></button><button {...holdDirection('arrowdown')} className="down" aria-label="向下移动"><span className="control-arrow" /></button><button {...holdDirection('arrowright')} className="right" aria-label="向右移动"><span className="control-arrow" /></button></div>
+      <button className={`base-interact-button ${nearest ? 'is-ready' : ''}`} disabled={!nearest} onClick={() => nearest && onNavigate(nearest.id)}><GameIcon name="prototype" size={38} /><span>{nearest ? '进入' : '靠近设施'}</span></button>
     </div>
   </div>
 }
