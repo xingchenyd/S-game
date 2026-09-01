@@ -1,4 +1,4 @@
-export type MusicScene = 'start' | 'hub' | 'adventure' | 'museum' | 'theater' | 'training' | 'equipment' | 'exchange' | 'profile' | 'boss' | 'result'
+export type MusicScene = 'start' | 'hub' | 'adventure' | 'museum' | 'theater' | 'training' | 'equipment' | 'skills' | 'exchange' | 'profile' | 'boss' | 'result'
 interface Score { name: string; tempo: number; root: number; scale: number[]; bass: number[]; lead: number[]; wave: OscillatorType; color: number }
 
 const scores: Record<MusicScene, Score> = {
@@ -9,6 +9,7 @@ const scores: Record<MusicScene, Score> = {
   theater: { name: '物品开口以前', tempo: 68, root: 65.41, scale: [0, 3, 5, 8, 10], bass: [0, 3, 2, 1], lead: [0, 1, 3, 2, 4, 3, 1, 2], wave: 'triangle', color: .45 },
   training: { name: '系统实验室', tempo: 106, root: 61.74, scale: [0, 2, 5, 7, 10], bass: [0, 2, 4, 3], lead: [0, 3, 2, 4, 1, 3, 4, 2], wave: 'square', color: .48 },
   equipment: { name: '扳手与模块', tempo: 100, root: 55, scale: [0, 3, 5, 7, 10], bass: [0, 1, 3, 2], lead: [0, 2, 1, 3, 2, 4, 3, 1], wave: 'square', color: .4 },
+  skills: { name: '城市经验树', tempo: 92, root: 61.74, scale: [0, 2, 5, 7, 9], bass: [0, 3, 1, 4], lead: [0, 1, 3, 2, 4, 2, 3, 1], wave: 'triangle', color: .58 },
   exchange: { name: '把原型带回现实', tempo: 88, root: 73.42, scale: [0, 2, 4, 7, 11], bass: [0, 3, 4, 2], lead: [0, 2, 4, 3, 1, 3, 4, 2], wave: 'triangle', color: .62 },
   profile: { name: '行动记录', tempo: 76, root: 65.41, scale: [0, 2, 4, 7, 9], bass: [0, 3, 1, 2], lead: [0, 1, 2, 4, 3, 2, 1, 0], wave: 'sine', color: .42 },
   boss: { name: '污染外壳', tempo: 136, root: 46.25, scale: [0, 1, 5, 6, 10], bass: [0, 2, 1, 4], lead: [0, 4, 1, 3, 2, 4, 1, 2], wave: 'sawtooth', color: .88 },

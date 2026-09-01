@@ -1,4 +1,4 @@
-const CACHE = 's-game-v3'
+const CACHE = 's-game-v4'
 const SHELL = ['./', './manifest.webmanifest']
 
 self.addEventListener('install', event => {

@@ -1,22 +1,28 @@
-import { ArrowLeft, Check, ChevronRight, Gauge, Heart, LockKeyhole, ShieldAlert, Sparkles, Target } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { ArrowLeft, Check, ChevronRight, Gauge, Heart, LockKeyhole, MapPinned, ShieldAlert, Sparkles, Target, Users } from 'lucide-react'
+import { lazy, Suspense, useMemo, useState } from 'react'
 import { adventures, buildCards, classificationChallenges } from '../data/content'
 import { getPlayMode, modeSimulations } from '../data/playModes'
-import PhaserCombat, { type BattleResult } from '../game/PhaserCombat'
+import type { BattleResult } from '../game/PhaserCombat'
+import ExplorationRoom from '../components/ExplorationRoom'
+import { isMissionUnlocked, shanghaiCampaign } from '../data/campaign'
+import { difficultyTuning, resolveCombatStats } from '../data/balance'
 import { startMusic } from '../store/audio'
-import type { AdventureDefinition, Difficulty, PlayerProfile, RunMetrics } from '../types'
+import type { AdventureDefinition, CampaignMission, Difficulty, PlayerProfile, RunMetrics } from '../types'
 
-type Phase = 'briefing' | 'combat' | 'classify' | 'build' | 'boss' | 'result' | 'defeat'
+type Phase = 'briefing' | 'room' | 'combat' | 'classify' | 'build' | 'boss' | 'result' | 'defeat'
 
 interface Props { profile: PlayerProfile; onChange: (profile: PlayerProfile) => void; onImmersive: (value: boolean) => void }
+const PhaserCombat = lazy(() => import('../game/PhaserCombat'))
 
-const difficultyCopy: Record<Difficulty, string> = { experience: '体验：敌人较少，适合活动现场', standard: '标准：完整战斗与教育反馈', challenge: '环线：敌人更密集，奖励更高' }
+const difficultyCopy: Record<Difficulty, string> = { experience: '简单：活动现场与首次体验', standard: '普通：完整机制与标准节奏', challenge: '困难：更短预警与更高污染压力' }
 const legacyPrototypeIds: Record<string, string> = { 'lujiazui-circuit': 'lujiazui-core', 'suzhou-plastic': 'suzhou-core', 'yangpu-paper': 'yangpu-core', 'changning-textile': 'changning-core' }
 const getPrototypeCollectibleId = (routeId: string) => legacyPrototypeIds[routeId] ?? `${routeId}-core`
 
 export default function AdventureScreen({ profile, onChange, onImmersive }: Props) {
   const [selected, setSelected] = useState<AdventureDefinition | null>(null)
-  const [difficulty, setDifficulty] = useState<Difficulty>('standard')
+  const [selectedMission, setSelectedMission] = useState<CampaignMission | null>(null)
+  const [mapMode, setMapMode] = useState<'campaign' | 'routes'>('campaign')
+  const [difficulty, setDifficulty] = useState<Difficulty>(() => profile.settings.eventMode ? 'experience' : 'standard')
   const [phase, setPhase] = useState<Phase>('briefing')
   const [metrics, setMetrics] = useState<RunMetrics>({ hp: 100, maxHp: 100, pollution: 68, value: 0, accuracy: 100, combo: 0, finisher: 0, stage: 0, totalStages: 5 })
   const [builds, setBuilds] = useState<string[]>([])
@@ -31,9 +37,10 @@ export default function AdventureScreen({ profile, onChange, onImmersive }: Prop
   const modeDesign = routeMode ? getPlayMode(routeMode) : undefined
   const modeRound = routeMode ? modeSimulations.find((simulation) => simulation.modeId === routeMode)?.rounds[0] : undefined
   const prototypeCollectibleId = getPrototypeCollectibleId(selected?.id ?? 'unknown')
+  const combatStats = useMemo(() => resolveCombatStats(profile), [profile])
 
   const musicVolume = profile.settings.musicVolume * profile.settings.masterVolume
-  const begin = () => { startMusic('adventure', musicVolume); setPhase('combat'); setMetrics((m) => ({ ...m, stage: 1 })); onImmersive(true) }
+  const begin = () => { startMusic('adventure', musicVolume); setPhase(selectedMission ? 'room' : 'combat'); setMetrics((m) => ({ ...m, stage: 1 })); onImmersive(true) }
   const battleDone = (result: BattleResult) => {
     setPurified((value) => value + result.purified)
     setMetrics((m) => ({ ...m, value: result.value, pollution: Math.max(0, m.pollution - 18), stage: phase === 'boss' ? 5 : 2 }))
@@ -56,9 +63,13 @@ export default function AdventureScreen({ profile, onChange, onImmersive }: Prop
   const chooseBuild = (id: string) => { setBuilds((value) => [...value, id]); startMusic('boss', musicVolume); setPhase('boss'); setMetrics((m) => ({ ...m, stage: 4 })) }
   const finish = (result: BattleResult) => {
     if (!selected) return
-    const multiplier = difficulty === 'challenge' ? 1.5 : difficulty === 'experience' ? .8 : 1
+    const multiplier = difficultyTuning[difficulty].reward
     const points = Math.round((result.value + correctSystems * 18 + (correctSystems === 0 ? 8 : 0)) * multiplier)
     const prototypeId = getPrototypeCollectibleId(selected.id)
+    const firstMissionClear = Boolean(selectedMission && !profile.campaignCompleted.includes(selectedMission.id))
+    const skillReward = firstMissionClear && ['sh-02', 'sh-04', 'sh-05'].includes(selectedMission?.id ?? '') ? 1 : firstMissionClear && selectedMission?.id === 'sh-08' ? 2 : 0
+    const missionIndex = selectedMission ? shanghaiCampaign.findIndex((mission) => mission.id === selectedMission.id) : -1
+    const nextMission = shanghaiCampaign[missionIndex + 1]?.id ?? selectedMission?.id ?? profile.currentMission
     const next = {
       ...profile,
       points: profile.points + points,
@@ -66,6 +77,9 @@ export default function AdventureScreen({ profile, onChange, onImmersive }: Prop
       printShards: profile.printShards + 1,
       prototypes: [...new Set([...profile.prototypes, selected.prototype])],
       collectibles: [...new Set([...profile.collectibles, prototypeId])],
+      campaignCompleted: selectedMission ? [...new Set([...profile.campaignCompleted, selectedMission.id])] : profile.campaignCompleted,
+      currentMission: selectedMission ? nextMission : profile.currentMission,
+      skillPoints: profile.skillPoints + skillReward,
       stats: {
         ...profile.stats,
         runs: profile.stats.runs + 1,
@@ -83,26 +97,29 @@ export default function AdventureScreen({ profile, onChange, onImmersive }: Prop
     setPhase('result')
     onImmersive(false)
   }
-  const reset = () => { startMusic('adventure', musicVolume); setSelected(null); setPhase('briefing'); setBuilds([]); setAnswer(null); setCorrect(false); setSystemIndex(0); setCorrectSystems(0); setPurified(0); setMetrics({ hp: 100, maxHp: 100, pollution: 68, value: 0, accuracy: 100, combo: 0, finisher: 0, stage: 0, totalStages: 5 }); onImmersive(false) }
+  const reset = () => { startMusic('adventure', musicVolume); setSelected(null); setSelectedMission(null); setPhase('briefing'); setBuilds([]); setAnswer(null); setCorrect(false); setSystemIndex(0); setCorrectSystems(0); setPurified(0); setMetrics({ hp: 100, maxHp: 100, pollution: 68, value: 0, accuracy: 100, combo: 0, finisher: 0, stage: 0, totalStages: 5 }); onImmersive(false) }
 
   if (!selected) return <div className="adventure-select screen-enter">
-    <header className="page-title"><div><span className="eyebrow">ACTION ROUTES / SHANGHAI</span><h1>选择城市行动</h1><p>每条路线把战斗、处理决策和Boss原型串成一次完整价值保留行动。</p></div></header>
-    <div className="difficulty-bar pixel-panel"><b>行动强度</b>{(Object.keys(difficultyCopy) as Difficulty[]).map((item) => <button key={item} className={difficulty === item ? 'active' : ''} onClick={() => setDifficulty(item)}>{item === 'experience' ? '体验' : item === 'standard' ? '标准' : '环线挑战'}<small>{difficultyCopy[item]}</small></button>)}</div>
-    <div className="adventure-grid">{adventures.map((item, index) => <button key={item.id} className={`adventure-card ${!item.available ? 'locked' : ''}`} style={{ '--accent': item.accent } as React.CSSProperties} onClick={() => item.available && setSelected(item)} disabled={!item.available}>
+    <header className="page-title"><div><span className="eyebrow">SHANGHAI CAMPAIGN / CHAPTER 01</span><h1>上海循环行动</h1><p>主线从虹桥撤展异常开始，沿城市材料流向追查污染源，最终在世博公众日完成闭环验证。</p></div><div className="campaign-progress"><b>{profile.campaignCompleted.length}/10</b><span>篇章节点</span></div></header>
+    <div className="adventure-mode-tabs"><button className={mapMode === 'campaign' ? 'active' : ''} onClick={() => setMapMode('campaign')}><MapPinned /> 上海主线</button><button className={mapMode === 'routes' ? 'active' : ''} onClick={() => setMapMode('routes')}><Sparkles /> 自由行动</button></div>
+    <div className="difficulty-bar pixel-panel"><b>行动难度</b>{(Object.keys(difficultyCopy) as Difficulty[]).map((item) => <button key={item} className={difficulty === item ? 'active' : ''} onClick={() => setDifficulty(item)}><strong>{difficultyTuning[item].name}</strong><small>{difficultyCopy[item]}</small><em>奖励 ×{difficultyTuning[item].reward}</em></button>)}</div>
+    {mapMode === 'campaign' && <section className="campaign-map pixel-panel"><div className="campaign-line" />{shanghaiCampaign.map((mission) => { const unlocked = isMissionUnlocked(mission, profile.campaignCompleted); const completed = profile.campaignCompleted.includes(mission.id); const route = adventures.find((item) => item.id === mission.routeId); return <button key={mission.id} className={`campaign-node ${completed ? 'completed' : unlocked ? 'unlocked' : 'locked'}`} disabled={!unlocked || !route} onClick={() => { if (route) { setSelectedMission(mission); setSelected(route) } }} style={{ '--node-accent': route?.accent } as React.CSSProperties}><span>{completed ? <Check /> : unlocked ? String(mission.order).padStart(2, '0') : <LockKeyhole />}</span><div><small>{mission.location} · {mission.kind.toUpperCase()}</small><b>{mission.title}</b><em>{mission.subtitle}</em><p>{mission.summary}</p><u><Users /> {mission.cast.join(' · ')}</u><strong>{mission.reward}</strong></div></button> })}</section>}
+    {mapMode === 'routes' && <div className="adventure-grid">{adventures.map((item, index) => <button key={item.id} className={`adventure-card ${!item.available ? 'locked' : ''}`} style={{ '--accent': item.accent } as React.CSSProperties} onClick={() => item.available && setSelected(item)} disabled={!item.available}>
       <img src={item.background} alt="" /><span className="adventure-shade" /><span className="route-number">{String(index + 1).padStart(2, '0')}</span>{!item.available && <span className="locked-chip"><LockKeyhole /> 筹备中</span>}
       <span className="adventure-info"><span className="eyebrow">{item.location}</span><b>{item.name}</b><small>{item.briefing}</small><span className="route-card-modes">{item.modes?.map((mode) => <em key={mode}>{getPlayMode(mode)?.shortName}</em>)}</span><span className="boss-line"><ShieldAlert /> BOSS · {item.boss}</span></span><ChevronRight className="route-arrow" />
-    </button>)}</div>
+    </button>)}</div>}
   </div>
 
   if (phase === 'briefing') return <div className="briefing-screen screen-enter">
     <button className="back-button" onClick={reset}><ArrowLeft /> 返回路线</button>
     <section className="briefing-hero" style={{ backgroundImage: `linear-gradient(90deg,#061319f2,#0613198c), url(${selected.background})` }}>
       <span className="eyebrow">行动委托 · {selected.location}</span><h1>{selected.name}</h1><p>{selected.briefing}</p>
+      {selectedMission && <div className="mission-brief"><small>上海主线 {selectedMission.order}/10 · {selectedMission.subtitle}</small><h2>{selectedMission.objective}</h2>{selectedMission.dialogue.map((line) => <p key={`${line.speaker}-${line.text}`}><b>{line.speaker}</b><span>{line.text}</span></p>)}</div>}
       <div className="lesson-list">{selected.lesson.map((line) => <div key={line}><Check />{line}</div>)}</div>
       <div className="boss-preview"><span>污染外壳</span><b>{selected.boss}</b><small>净化后掉落：{selected.prototype}</small></div>
       <div className="route-node-preview">{selected.routeNodes?.map((node, index) => <div key={node.id}><span>{String(index + 1).padStart(2, '0')}</span><b>{node.name}</b><small>{node.description}</small></div>)}</div>
       <div className="route-mode-tags">本路线系统 {selected.modes?.map((mode) => <span key={mode}>{getPlayMode(mode)?.shortName}</span>)}</div>
-      <button className="primary-button" onClick={begin}>进入行动 <ChevronRight /></button>
+      <button className="primary-button" onClick={begin}>{selectedMission ? '进入可移动调查房间' : '进入行动'} <ChevronRight /></button>
     </section>
   </div>
 
@@ -116,9 +133,11 @@ export default function AdventureScreen({ profile, onChange, onImmersive }: Prop
       <div className="hud-stat value"><Sparkles /> <span>价值 {metrics.value}</span></div>
     </header>
 
+    {phase === 'room' && selectedMission && <ExplorationRoom mission={selectedMission} adventure={selected} previewTargets={profile.unlockedSkills.includes('system-scan')} onComplete={() => setPhase('combat')} />}
+
     {(phase === 'combat' || phase === 'boss') && <>
       <div className="objective-chip"><Target /> {phase === 'boss' ? `击破 ${selected.boss} 的污染外壳` : '稳定区域，净化游离污染体'} <b>连击 {metrics.combo} · 终结 {metrics.finisher}%</b></div>
-      <PhaserCombat adventure={selected} difficulty={difficulty} boss={phase === 'boss'} builds={builds} screenShake={profile.settings.screenShake} initialPollution={metrics.pollution} initialValue={metrics.value} onHud={(value) => setMetrics((m) => ({ ...m, ...value }))} onComplete={battleDone} onDefeat={() => { setPhase('defeat'); onImmersive(false) }} />
+      <Suspense fallback={<div className="loading-screen"><span /><b>正在装配精细2D战斗场景…</b></div>}><PhaserCombat adventure={selected} difficulty={difficulty} boss={phase === 'boss'} builds={builds} combatStats={combatStats} screenShake={profile.settings.screenShake} initialPollution={metrics.pollution} initialValue={metrics.value} onHud={(value) => setMetrics((m) => ({ ...m, ...value }))} onComplete={battleDone} onDefeat={() => { setPhase('defeat'); onImmersive(false) }} /></Suspense>
     </>}
 
     {phase === 'classify' && <section className="decision-overlay">

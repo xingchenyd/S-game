@@ -9,6 +9,8 @@ describe('local username saves', () => {
     const created = loginOrCreate(' 测试 玩家 ')
     expect(created.username).toBe('测试 玩家')
     expect(created.collectibles).toContain('battery')
+    expect(created.currentMission).toBe('sh-01')
+    expect(created.skillPoints).toBe(2)
     const saved = saveProfile({ ...created, points: 233 })
     expect(saved.points).toBe(233)
     expect(loadActiveProfile()?.points).toBe(233)

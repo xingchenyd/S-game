@@ -1,4 +1,4 @@
-import { ArrowRight, BookOpen, Boxes, ChartNoAxesCombined, Dumbbell, Gift, Map, Shirt, Sparkles } from 'lucide-react'
+import { ArrowRight, BookOpen, Boxes, ChartNoAxesCombined, Dumbbell, Gift, GitBranch, Map, Shirt, Sparkles } from 'lucide-react'
 import type { PlayerProfile, Screen } from '../types'
 
 interface Props { profile: PlayerProfile; onNavigate: (screen: Screen) => void }
@@ -38,6 +38,9 @@ export default function HubScreen({ profile, onNavigate }: Props) {
         </button>
         <button className="facility-card equipment" onClick={() => onNavigate('equipment')}>
           <span className="facility-icon"><Shirt /></span><span className="facility-copy"><b>装备工坊</b><small>模块化装配 · 遗产装备保留</small></span><ArrowRight />
+        </button>
+        <button className="facility-card skills" onClick={() => onNavigate('skills')}>
+          <span className="facility-icon"><GitBranch /></span><span className="facility-copy"><b>循环能力</b><small>行动 · 系统 · 共情三分支</small></span><span className="count-chip">{profile.skillPoints}</span>
         </button>
         <button className="facility-card exchange" onClick={() => onNavigate('exchange')}>
           <span className="facility-icon"><Gift /></span><span className="facility-copy"><b>现实兑换站</b><small>原型凭证 · 纪念章 · 模型预览</small></span><ArrowRight />

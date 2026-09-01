@@ -69,16 +69,19 @@ const buildRouteNodes = (route: AdventureDefinition): NonNullable<AdventureDefin
 export const adventures: AdventureDefinition[] = [...baseAdventures, ...extraAdventures].map((route) => ({ ...route, chapter: route.id === 'heixushan-future' ? '未来区域' : '上海首发篇', modes: modeByRoute[route.id], routeNodes: buildRouteNodes(route) }))
 
 export const equipment: EquipmentItem[] = [
-  { id: 'wrench-basic', name: '检修扳手', slot: 'weapon', rarity: '普通', description: '稳定可靠的近战工具。', stat: '攻击 +8', icon: `${legacy}/sprites/equip_wrench_basic.png`, cost: 0 },
-  { id: 'wrench-green', name: '回流扳手', slot: 'weapon', rarity: '精良', description: '命中后回收散落能量。', stat: '攻击 +12 · 吸附 +8%', icon: `${legacy}/sprites/equip_wrench_green.png`, cost: 120 },
-  { id: 'wrench-blue', name: '绝缘脉冲钳', slot: 'weapon', rarity: '稀有', description: '对电子污染外壳造成额外破稳。', stat: '攻击 +16 · 破稳 +15%', icon: `${legacy}/sprites/equip_wrench_blue.png`, cost: 240 },
-  { id: 'wrench-gold', name: '原型分解器', slot: 'weapon', rarity: '原型', description: '保留材料价值的高级工具。', stat: '攻击 +20 · 价值 +10%', icon: `${legacy}/sprites/equip_wrench_gold.png`, cost: 420 },
-  { id: 'helmet-basic', name: '分拣护目镜', slot: 'helmet', rarity: '普通', description: '标注危险部件。', stat: '暴击 +3%', icon: `${legacy}/sprites/equip_helmet_basic.png`, cost: 0 },
-  { id: 'helmet-blue', name: '材质扫描镜', slot: 'helmet', rarity: '稀有', description: '显示污染壳薄弱点。', stat: '暴击 +8%', icon: `${legacy}/sprites/equip_helmet_blue.png`, cost: 180 },
-  { id: 'armor-basic', name: '维修员外套', slot: 'armor', rarity: '普通', description: '耐磨的基础行动服。', stat: '生命 +10', icon: `${legacy}/sprites/equip_armor_basic.png`, cost: 0 },
-  { id: 'armor-green', name: '再生纤维护甲', slot: 'armor', rarity: '精良', description: '由高质量再生纤维制成。', stat: '生命 +18', icon: `${legacy}/sprites/equip_armor_green.png`, cost: 140 },
-  { id: 'armor-gold', name: '闭环行动服', slot: 'armor', rarity: '原型', description: '兼顾防护与灵活的实验装备。', stat: '生命 +28 · 移速 +5%', icon: `${legacy}/sprites/equip_armor_gold.png`, cost: 360 },
-  { id: 'boots-basic', name: '防滑工作靴', slot: 'boots', rarity: '普通', description: '穿越湿滑处理区。', stat: '移速 +4%', icon: `${legacy}/sprites/equip_boots_basic.png`, cost: 0 },
+  { id: 'wrench-basic', name: '检修扳手', slot: 'weapon', rarity: '普通', description: '稳定、宽容的基础净化工具。', stat: '净化 +2', power: 10, modifiers: { attack: 2 }, icon: `${legacy}/sprites/equip_wrench_basic.png`, cost: 0 },
+  { id: 'wrench-green', name: '回流扳手', slot: 'weapon', rarity: '精良', description: '扩大回收吸附区，适合移动构筑。', stat: '净化 +3 · 吸附 +10%', power: 20, modifiers: { attack: 3, aimAssist: .1 }, perk: '散落价值球吸附距离提高', icon: `${legacy}/sprites/equip_wrench_green.png`, cost: 120 },
+  { id: 'wrench-blue', name: '绝缘脉冲钳', slot: 'weapon', rarity: '稀有', description: '缩短技能循环，适合电子外壳破稳。', stat: '净化 +4 · 技能循环 +10%', power: 32, modifiers: { attack: 4, cooldownRate: .1 }, perk: '蓄力命中电子污染时额外破稳', icon: `${legacy}/sprites/equip_wrench_blue.png`, cost: 240 },
+  { id: 'wrench-gold', name: '原型分解器', slot: 'weapon', rarity: '原型', description: '减少破坏性处理，保留更多材料价值。', stat: '净化 +5 · 价值保留 +12%', power: 46, modifiers: { attack: 5, valueGain: .12 }, perk: 'Boss外壳最后一击额外保留价值', icon: `${legacy}/sprites/equip_wrench_gold.png`, cost: 420 },
+  { id: 'helmet-basic', name: '分拣护目镜', slot: 'helmet', rarity: '普通', description: '提供清楚的弱点标记。', stat: '弱点率 +3%', power: 10, modifiers: { critChance: .03 }, icon: `${legacy}/sprites/equip_helmet_basic.png`, cost: 0 },
+  { id: 'helmet-green', name: '流向标记镜', slot: 'helmet', rarity: '精良', description: '标记材料与最近接收点的方向。', stat: '弱点率 +4% · 吸附 +6%', power: 20, modifiers: { critChance: .04, aimAssist: .06 }, perk: '探索房间的目标标记持续更久', icon: `${legacy}/sprites/equip_helmet_basic.png`, cost: 120 },
+  { id: 'helmet-blue', name: '材质扫描镜', slot: 'helmet', rarity: '稀有', description: '同时识别污染薄弱点与高价值部件。', stat: '弱点率 +7% · 价值 +5%', power: 32, modifiers: { critChance: .07, valueGain: .05 }, icon: `${legacy}/sprites/equip_helmet_blue.png`, cost: 220 },
+  { id: 'armor-basic', name: '维修员外套', slot: 'armor', rarity: '普通', description: '耐磨的基础行动服。', stat: '生命 +10', power: 10, modifiers: { maxHp: 10 }, icon: `${legacy}/sprites/equip_armor_basic.png`, cost: 0 },
+  { id: 'armor-green', name: '再生纤维护甲', slot: 'armor', rarity: '精良', description: '在防护与轻量化之间保持平衡。', stat: '生命 +16 · 移速 +5', power: 20, modifiers: { maxHp: 16, moveSpeed: 5 }, icon: `${legacy}/sprites/equip_armor_green.png`, cost: 140 },
+  { id: 'armor-gold', name: '闭环行动服', slot: 'armor', rarity: '原型', description: '降低污染环境造成的持续代价。', stat: '生命 +24 · 污染防护 +10%', power: 46, modifiers: { maxHp: 24, pollutionGuard: .1 }, perk: '站在污染池中的伤害间隔延长', icon: `${legacy}/sprites/equip_armor_gold.png`, cost: 380 },
+  { id: 'boots-basic', name: '防滑工作靴', slot: 'boots', rarity: '普通', description: '穿越湿滑处理区。', stat: '移速 +10', power: 10, modifiers: { moveSpeed: 10 }, icon: `${legacy}/sprites/equip_boots_basic.png`, cost: 0 },
+  { id: 'boots-green', name: '回线短靴', slot: 'boots', rarity: '精良', description: '用短距离位移避开污染扩散。', stat: '移速 +14 · 技能循环 +5%', power: 20, modifiers: { moveSpeed: 14, cooldownRate: .05 }, icon: `${legacy}/sprites/equip_boots_basic.png`, cost: 130 },
+  { id: 'boots-blue', name: '无痕护送靴', slot: 'boots', rarity: '稀有', description: '护送材料时更快，且不扩大污染边界。', stat: '移速 +20 · 污染防护 +5%', power: 32, modifiers: { moveSpeed: 20, pollutionGuard: .05 }, perk: '护送节点移动惩罚降低', icon: `${legacy}/sprites/equip_boots_basic.png`, cost: 230 },
 ]
 
 const portrait = (name: string) => name === 'bluecat' ? '/art/characters/loop-guide.png' : `${legacy}/sprites/char_${name}.png`

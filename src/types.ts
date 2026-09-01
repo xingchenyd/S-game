@@ -1,4 +1,4 @@
-export type Screen = 'start' | 'hub' | 'adventure' | 'museum' | 'theater' | 'profile' | 'equipment' | 'exchange' | 'training'
+export type Screen = 'start' | 'hub' | 'adventure' | 'museum' | 'theater' | 'profile' | 'equipment' | 'skills' | 'exchange' | 'training'
 export type WasteType = 'electronic' | 'plastic' | 'paper' | 'textile'
 export type Difficulty = 'experience' | 'standard' | 'challenge'
 
@@ -44,6 +44,10 @@ export interface PlayerProfile {
   prototypes: string[]
   collectibles: string[]
   storiesCompleted: string[]
+  campaignCompleted: string[]
+  currentMission: string
+  skillPoints: number
+  unlockedSkills: string[]
   modeMastery: Partial<Record<PlayModeId, number>>
   equipmentOwned: string[]
   equipped: EquippedItems
@@ -77,8 +81,68 @@ export interface EquipmentItem {
   rarity: '普通' | '精良' | '稀有' | '原型'
   description: string
   stat: string
+  power: number
+  modifiers: Partial<CombatStats>
+  perk?: string
   icon: string
   cost: number
+}
+
+export interface CombatStats {
+  maxHp: number
+  attack: number
+  attackSpeed: number
+  moveSpeed: number
+  cooldownRate: number
+  critChance: number
+  valueGain: number
+  pollutionGuard: number
+  aimAssist: number
+}
+
+export interface DifficultyTuning {
+  id: Difficulty
+  name: string
+  audience: string
+  enemyHp: number
+  enemyDamage: number
+  spawnRate: number
+  pollutionRate: number
+  telegraphTime: number
+  reward: number
+  aimAssist: number
+}
+
+export interface SkillNode {
+  id: string
+  name: string
+  branch: '行动' | '系统' | '共情'
+  tier: number
+  cost: number
+  description: string
+  effect: string
+  requires: string[]
+  modifiers?: Partial<CombatStats>
+  routeAbility?: string
+}
+
+export type CampaignNodeKind = 'story' | 'combat' | 'system' | 'explore' | 'rest' | 'elite' | 'boss'
+
+export interface CampaignMission {
+  id: string
+  order: number
+  title: string
+  subtitle: string
+  location: string
+  routeId: string
+  kind: CampaignNodeKind
+  summary: string
+  objective: string
+  cast: string[]
+  dialogue: { speaker: string; text: string }[]
+  evidence: [string, string, string]
+  requires: string[]
+  reward: string
 }
 
 export interface Collectible {

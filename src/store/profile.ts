@@ -27,6 +27,10 @@ const defaultProfile = (username: string): PlayerProfile => ({
   prototypes: [],
   collectibles: ['battery', 'bottle', 'paper-box', 'shirt'],
   storiesCompleted: [],
+  campaignCompleted: [],
+  currentMission: 'sh-01',
+  skillPoints: 2,
+  unlockedSkills: [],
   modeMastery: {},
   equipmentOwned: ['wrench-basic', 'helmet-basic', 'armor-basic', 'boots-basic'],
   equipped: { weapon: 'wrench-basic', helmet: 'helmet-basic', armor: 'armor-basic', boots: 'boots-basic' },
@@ -48,6 +52,10 @@ const parseUsers = (): Record<string, PlayerProfile> => {
     const users = JSON.parse(localStorage.getItem(USERS_KEY) || '{}') as Record<string, PlayerProfile>
     for (const profile of Object.values(users)) {
       profile.modeMastery ??= {}
+      profile.campaignCompleted ??= []
+      profile.currentMission ??= 'sh-01'
+      profile.skillPoints ??= 2
+      profile.unlockedSkills ??= []
       profile.settings.voiceVolume ??= .85
       profile.settings.voicePreview ??= false
     }
@@ -119,6 +127,10 @@ export const importProfile = async (file: File): Promise<PlayerProfile> => {
     stats: { ...base.stats, ...parsed.stats },
     equipped: { ...base.equipped, ...parsed.equipped },
     modeMastery: parsed.modeMastery ?? {},
+    campaignCompleted: parsed.campaignCompleted ?? [],
+    currentMission: parsed.currentMission ?? 'sh-01',
+    skillPoints: parsed.skillPoints ?? 2,
+    unlockedSkills: parsed.unlockedSkills ?? [],
     lastPlayedAt: new Date().toISOString(),
   }
   return saveProfile(profile)

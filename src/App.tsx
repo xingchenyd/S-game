@@ -9,6 +9,7 @@ import ProfileScreen from './screens/ProfileScreen'
 import StartScreen from './screens/StartScreen'
 import TheaterScreen from './screens/TheaterScreen'
 import TrainingScreen from './screens/TrainingScreen'
+import SkillTreeScreen from './screens/SkillTreeScreen'
 import { loadActiveProfile, logout, resetEventProfile, saveProfile } from './store/profile'
 import { resumeAudio, setMasterVolume, startMusic, stopMusic, type MusicScene } from './store/audio'
 import type { PlayerProfile, Screen } from './types'
@@ -65,7 +66,7 @@ export default function App() {
   const notify = useCallback((text: string, tone: 'success' | 'warning' = 'success') => setToast({ id: Date.now(), text, tone }), [])
   const navigate = (next: Screen) => {
     if (next === screen) return
-    const labels: Record<Screen, string> = { start: '启动', hub: '循环基地', adventure: '城市行动', museum: '价值展馆', theater: '循环剧场', training: '系统训练', profile: '行动档案', equipment: '装备工坊', exchange: '现实兑换' }
+    const labels: Record<Screen, string> = { start: '启动', hub: '循环基地', adventure: '城市行动', museum: '价值展馆', theater: '循环剧场', training: '系统训练', profile: '行动档案', equipment: '装备工坊', skills: '循环能力', exchange: '现实兑换' }
     if (profile?.settings.reducedMotion) { setImmersive(false); setScreen(next); window.scrollTo({ top: 0 }); return }
     transitionTimers.current.forEach(window.clearTimeout)
     setTransitionLabel(labels[next])
@@ -86,6 +87,7 @@ export default function App() {
     case 'theater': content = <TheaterScreen profile={profile} onChange={updateProfile} />; break
     case 'training': content = <TrainingScreen profile={profile} onChange={updateProfile} />; break
     case 'equipment': content = <EquipmentScreen profile={profile} onChange={updateProfile} notify={notify} />; break
+    case 'skills': content = <SkillTreeScreen profile={profile} onChange={updateProfile} notify={notify} />; break
     case 'exchange': content = <ExchangeScreen profile={profile} onChange={updateProfile} notify={notify} />; break
     case 'profile': content = <ProfileScreen profile={profile} onChange={updateProfile} notify={notify} onLogout={() => { logout(); setProfile(null); setScreen('hub') }} onEventReset={() => { setProfile(resetEventProfile(profile.username)); setScreen('hub'); notify('展会存档已重置', 'success') }} />; break
     default: content = <HubScreen profile={profile} onNavigate={navigate} />

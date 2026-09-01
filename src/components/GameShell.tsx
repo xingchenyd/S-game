@@ -18,6 +18,7 @@ const nav: { screen: Screen; label: string; icon: string }[] = [
   { screen: 'training', label: '训练', icon: 'shield-check' },
   { screen: 'museum', label: '展馆', icon: 'archive-box' },
   { screen: 'theater', label: '剧场', icon: 'book' },
+  { screen: 'skills', label: '能力', icon: 'sparkles' },
   { screen: 'profile', label: '档案', icon: 'user-avatar' },
 ]
 
