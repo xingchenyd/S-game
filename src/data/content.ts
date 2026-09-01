@@ -1,6 +1,7 @@
 import type { AdventureDefinition, Collectible, EquipmentItem } from '../types'
+import { assetUrl } from '../utils/assets'
 
-const legacy = '/art/legacy'
+const legacy = assetUrl('art/legacy')
 
 const baseAdventures: AdventureDefinition[] = [
   {
@@ -41,12 +42,12 @@ const baseAdventures: AdventureDefinition[] = [
 ]
 
 const extraAdventures: AdventureDefinition[] = [
-  { id: 'hongqiao-event', name: '虹桥·撤展倒计时', subtitle: '公益展会复合行动', location: '闵行区 · 虹桥会展带', wasteType: 'plastic', icon: '▦', accent: '#ff9b5e', background: '/art/scenes/event-hall.png', available: true, briefing: '闭馆前一小时，餐区包装、喷绘物料和电子体验设备同时回流。先稳住人流与危险物，再让可复用展具进入下一场活动。', lesson: ['公益活动自身也要为物料负责', '纸塑复合包装以现场专项标识为准', '展具应在设计与合同阶段预设去向'], boss: '一次性巨幕兽', prototype: '虹桥·周转展具原型' },
-  { id: 'lingang-logistics', name: '临港·逆向物流线', subtitle: '材料护送行动', location: '浦东新区 · 临港物流中心', wasteType: 'plastic', icon: '⇢', accent: '#68d6ff', background: '/art/scenes/logistics-terminal.png', available: true, briefing: '清洁缠绕膜与周转箱等待返程车，混装、雨水和错误交接正在让价值快速下降。你需要护送材料，而不是只清空仓库。', lesson: ['单一清洁材料更容易稳定再生', '逆向物流要与真实返程容量衔接', '交接记录让去向可以核验'], boss: '混装吞运体', prototype: '临港·透明物流原型' },
+  { id: 'hongqiao-event', name: '虹桥·撤展倒计时', subtitle: '公益展会复合行动', location: '闵行区 · 虹桥会展带', wasteType: 'plastic', icon: '▦', accent: '#ff9b5e', background: assetUrl('art/scenes/event-hall.png'), available: true, briefing: '闭馆前一小时，餐区包装、喷绘物料和电子体验设备同时回流。先稳住人流与危险物，再让可复用展具进入下一场活动。', lesson: ['公益活动自身也要为物料负责', '纸塑复合包装以现场专项标识为准', '展具应在设计与合同阶段预设去向'], boss: '一次性巨幕兽', prototype: '虹桥·周转展具原型' },
+  { id: 'lingang-logistics', name: '临港·逆向物流线', subtitle: '材料护送行动', location: '浦东新区 · 临港物流中心', wasteType: 'plastic', icon: '⇢', accent: '#68d6ff', background: assetUrl('art/scenes/logistics-terminal.png'), available: true, briefing: '清洁缠绕膜与周转箱等待返程车，混装、雨水和错误交接正在让价值快速下降。你需要护送材料，而不是只清空仓库。', lesson: ['单一清洁材料更容易稳定再生', '逆向物流要与真实返程容量衔接', '交接记录让去向可以核验'], boss: '混装吞运体', prototype: '临港·透明物流原型' },
   { id: 'chongming-ecology', name: '崇明·风散边界', subtitle: '生态区域控制行动', location: '崇明区 · 社区农园', wasteType: 'plastic', icon: '≈', accent: '#75eda0', background: `${legacy}/generated/bg_plastic.png`, available: true, briefing: '轻薄膜材在大风中越过围栏。阻止逸散、保护人员与作物，并为园区建立季节性收集节点。', lesson: ['轻薄塑料应防止逸散', '不以露天焚烧缩小体积', '生产场景需要专门管理与回收安排'], boss: '风膜群落', prototype: '崇明·定风薄膜原型' },
-  { id: 'campus-lab', name: '校园·维修实验课', subtitle: '诊断与风险隔离行动', location: '杨浦区 · 校园实验楼', wasteType: 'electronic', icon: '⌁', accent: '#aa91ff', background: '/art/scenes/repair-campus.png', available: true, briefing: '故障玩具、旧灯管和未擦除数据的平板同时进入实验楼。先识别哪些能修、哪些必须停止普通操作。', lesson: ['故障不等于报废', '危险维修有明确边界', '易破损有害垃圾需轻放并妥善包裹'], boss: '误诊拼装兽', prototype: '校园·维修判断原型' },
+  { id: 'campus-lab', name: '校园·维修实验课', subtitle: '诊断与风险隔离行动', location: '杨浦区 · 校园实验楼', wasteType: 'electronic', icon: '⌁', accent: '#aa91ff', background: assetUrl('art/scenes/repair-campus.png'), available: true, briefing: '故障玩具、旧灯管和未擦除数据的平板同时进入实验楼。先识别哪些能修、哪些必须停止普通操作。', lesson: ['故障不等于报废', '危险维修有明确边界', '易破损有害垃圾需轻放并妥善包裹'], boss: '误诊拼装兽', prototype: '校园·维修判断原型' },
   { id: 'mall-foodcourt', name: '五角场·午间分流', subtitle: '高峰分类行动', location: '杨浦区 · 商场餐区', wasteType: 'paper', icon: '▤', accent: '#ffd65a', background: `${legacy}/generated/market.png`, available: true, briefing: '餐区高峰让餐余、纸杯、餐盒和饮料瓶黏成一团。通过分离台、现场标识与人流引导守住批次纯度。', lesson: ['湿垃圾与包装先分离', '餐盒等专项回收取决于区域条件', '正确动线能降低每个人的判断负担'], boss: '油渍混投王', prototype: '五角场·清洁分流原型' },
-  { id: 'public-exhibition', name: '世博园·闭环公众日', subtitle: '四类材料终局预演', location: '浦东新区 · 公益活动现场', wasteType: 'textile', icon: '◆', accent: '#ff78ad', background: '/art/scenes/event-hall.png', available: true, briefing: '四类物料与数百名玩家同时进入现场。你要在安全、教育、流畅度和现实奖励之间完成一次公开可复盘的系统行动。', lesson: ['按风险和价值而不是曝光度分配资源', '实体奖励应按需生产并公开材料去向', '数字护照与实物兑换可以互补'], boss: '公益幻象壳', prototype: '世博园·城市闭环原型' },
+  { id: 'public-exhibition', name: '世博园·闭环公众日', subtitle: '四类材料终局预演', location: '浦东新区 · 公益活动现场', wasteType: 'textile', icon: '◆', accent: '#ff78ad', background: assetUrl('art/scenes/event-hall.png'), available: true, briefing: '四类物料与数百名玩家同时进入现场。你要在安全、教育、流畅度和现实奖励之间完成一次公开可复盘的系统行动。', lesson: ['按风险和价值而不是曝光度分配资源', '实体奖励应按需生产并公开材料去向', '数字护照与实物兑换可以互补'], boss: '公益幻象壳', prototype: '世博园·城市闭环原型' },
 ]
 
 const modeByRoute: Record<string, NonNullable<AdventureDefinition['modes']>> = {
@@ -84,7 +85,7 @@ export const equipment: EquipmentItem[] = [
   { id: 'boots-blue', name: '无痕护送靴', slot: 'boots', rarity: '稀有', description: '护送材料时更快，且不扩大污染边界。', stat: '移速 +20 · 污染防护 +5%', power: 32, modifiers: { moveSpeed: 20, pollutionGuard: .05 }, perk: '护送节点移动惩罚降低', icon: `${legacy}/sprites/equip_boots_basic.png`, cost: 230 },
 ]
 
-const portrait = (name: string) => name === 'bluecat' ? '/art/characters/loop-guide.png' : `${legacy}/sprites/char_${name}.png`
+const portrait = (name: string) => name === 'bluecat' ? assetUrl('art/characters/loop-guide.png') : `${legacy}/sprites/char_${name}.png`
 const souvenir = (type: string, index: number) => `${legacy}/themes/${type}_souvenir_${index}.png`
 
 export const collectibles: Collectible[] = [

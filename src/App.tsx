@@ -94,7 +94,7 @@ export default function App() {
   }
 
   return <>
-    <GameShell profile={profile} screen={screen} onNavigate={navigate} onSettingsChange={updateProfile} immersive={immersive}>{content}</GameShell>
+    <GameShell profile={profile} screen={screen} onNavigate={navigate} onSettingsChange={updateProfile} immersive={immersive || screen === 'hub'}>{content}</GameShell>
     {transitionLabel && <div className="scene-transition" aria-hidden="true"><span /><div><small>ROUTE LINK</small><b>{transitionLabel}</b><i /></div></div>}
     {eventCountdown !== null && <button className="event-countdown" onClick={() => setEventCountdown(null)}><b>{eventCountdown}</b><span>秒后清空展会存档并返回开始页<br />点击或按键即可继续本局</span></button>}
     <Toast message={toast} onDone={() => setToast(null)} />

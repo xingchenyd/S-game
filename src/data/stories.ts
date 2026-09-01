@@ -1,6 +1,7 @@
 import type { KnowledgeSource, StoryBeat, StoryDefinition, WasteType } from '../types'
+import { assetUrl } from '../utils/assets'
 
-const legacy = '/art/legacy'
+const legacy = assetUrl('art/legacy')
 const portraits: Record<WasteType, string> = {
   electronic: `${legacy}/sprites/char_phone.png`,
   plastic: `${legacy}/sprites/char_bottle.png`,
@@ -13,7 +14,7 @@ const covers: Record<WasteType, string> = {
   paper: `${legacy}/generated/bg_paper.png`,
   textile: `${legacy}/generated/bg_textile.png`,
 }
-const guide = '/art/characters/loop-guide.png'
+const guide = assetUrl('art/characters/loop-guide.png')
 
 export const knowledgeSources: KnowledgeSource[] = [
   { id: 'sh-guide-2024', title: '上海市生活垃圾分类投放指引（2024版）', publisher: '上海市绿化和市容管理局', url: 'https://lhsr.sh.gov.cn/srgl/20240806/40b9feaa-53db-472f-8a6b-2c3cf0465def.html', scope: '上海生活垃圾分类、清洁干燥、容器和投放要求', checkedAt: '2026-09-01' },

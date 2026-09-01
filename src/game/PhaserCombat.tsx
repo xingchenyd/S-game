@@ -4,6 +4,7 @@ import type { AdventureDefinition, CombatStats, Difficulty, RunMetrics } from '.
 import { playUiSound } from '../store/audio'
 import { bosses, elitesFor, enemiesFor, type EnemyDefinition } from '../data/enemies'
 import { difficultyTuning } from '../data/balance'
+import { assetUrl } from '../utils/assets'
 
 export interface BattleResult { purified: number; damageTaken: number; value: number }
 
@@ -21,7 +22,7 @@ interface Props {
   onDefeat: () => void
 }
 
-const legacy = '/art/legacy'
+const legacy = assetUrl('art/legacy')
 
 class ActionScene extends Phaser.Scene {
   private hero!: Phaser.Physics.Arcade.Sprite
@@ -72,7 +73,7 @@ class ActionScene extends Phaser.Scene {
     this.load.image('hero-walk-1', `${legacy}/sprites/hero_walk_right_1.png`)
     this.load.image('hero-walk-2', `${legacy}/sprites/hero_walk_right_2.png`)
     for (let i = 0; i < 8; i += 1) this.load.image(`enemy-${i}`, `${legacy}/themes/${type}_monster_${i}.png`)
-    this.load.image('enemy-refined', `/art/enemies-v2/${type}-shell.png`)
+    this.load.image('enemy-refined', assetUrl(`art/enemies-v2/${type}-shell.png`))
     this.load.image('spark', `${legacy}/sprites/item_spark.png`)
     this.load.image('shield', `${legacy}/sprites/item_shield.png`)
     this.load.image('core', `${legacy}/sprites/item_print.png`)

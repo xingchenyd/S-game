@@ -3,11 +3,12 @@ import { useEffect, useState } from 'react'
 import type { PlayerProfile } from '../types'
 import { listUsers, loginOrCreate } from '../store/profile'
 import { playUiSound } from '../store/audio'
+import { assetUrl } from '../utils/assets'
 
 const covers = [
-  { src: '/art/covers/core-worlds.png', eyebrow: '四大材料世界', line: '战胜污染外壳，找回材料价值' },
-  { src: '/art/covers/pollution-shell.png', eyebrow: '上海首发行动', line: '从陆家嘴出发，夺回稳定原型' },
-  { src: '/art/covers/public-action.png', eyebrow: '游戏连接现实', line: '收集原型凭证，解锁公益行动纪念' },
+  { src: assetUrl('art/covers/core-worlds.png'), eyebrow: '四大材料世界', line: '战胜污染外壳，找回材料价值' },
+  { src: assetUrl('art/covers/pollution-shell.png'), eyebrow: '上海首发行动', line: '从陆家嘴出发，夺回稳定原型' },
+  { src: assetUrl('art/covers/public-action.png'), eyebrow: '游戏连接现实', line: '收集原型凭证，解锁公益行动纪念' },
 ]
 
 export default function StartScreen({ onLogin }: { onLogin: (profile: PlayerProfile) => void }) {

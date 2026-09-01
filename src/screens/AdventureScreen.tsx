@@ -8,6 +8,7 @@ import { isMissionUnlocked, shanghaiCampaign } from '../data/campaign'
 import { difficultyTuning, resolveCombatStats } from '../data/balance'
 import { startMusic } from '../store/audio'
 import type { AdventureDefinition, CampaignMission, Difficulty, PlayerProfile, RunMetrics } from '../types'
+import { assetUrl } from '../utils/assets'
 
 type Phase = 'briefing' | 'room' | 'combat' | 'classify' | 'build' | 'boss' | 'result' | 'defeat'
 
@@ -149,7 +150,7 @@ export default function AdventureScreen({ profile, onChange, onImmersive }: Prop
 
     {phase === 'build' && <section className="decision-overlay"><div className="build-panel"><span className="eyebrow">本局升级 · 三选一</span><h2>把刚才的处理经验变成战斗能力</h2><div className="build-grid">{buildOptions.map((card) => <button key={card.id} onClick={() => chooseBuild(card.id)} style={{ '--card-color': card.color } as React.CSSProperties}><span>{card.tag}</span><b>{card.name}</b><p>{card.description}</p><small>选择并进入Boss节点</small></button>)}</div></div></section>}
 
-    {phase === 'result' && <section className="result-screen"><div className="prototype-orb"><img src="/art/legacy/sprites/item_print.png" alt="稳定原型" /></div><span className="eyebrow">POLLUTION SHELL CLEARED</span><h1>稳定原型已回收</h1><p>你没有消灭一件废物，而是拆除了让它失控的污染外壳。</p><div className="result-grid"><div><b>{metrics.value}</b><span>本局价值保留</span></div><div><b>{metrics.pollution}%</b><span>最终污染率</span></div><div><b>{correctSystems}/{selected.modes?.length ?? 1}</b><span>系统判断有效</span></div></div><div className="prototype-ticket"><small>获得原型凭证 · {prototypeCollectibleId}</small><b>{selected.prototype}</b><span>可在现实兑换站查看纪念章 / 模型方案</span></div><button className="primary-button" onClick={reset}>返回行动地图</button></section>}
+    {phase === 'result' && <section className="result-screen"><div className="prototype-orb"><img src={assetUrl('art/legacy/sprites/item_print.png')} alt="稳定原型" /></div><span className="eyebrow">POLLUTION SHELL CLEARED</span><h1>稳定原型已回收</h1><p>你没有消灭一件废物，而是拆除了让它失控的污染外壳。</p><div className="result-grid"><div><b>{metrics.value}</b><span>本局价值保留</span></div><div><b>{metrics.pollution}%</b><span>最终污染率</span></div><div><b>{correctSystems}/{selected.modes?.length ?? 1}</b><span>系统判断有效</span></div></div><div className="prototype-ticket"><small>获得原型凭证 · {prototypeCollectibleId}</small><b>{selected.prototype}</b><span>可在现实兑换站查看纪念章 / 模型方案</span></div><button className="primary-button" onClick={reset}>返回行动地图</button></section>}
     {phase === 'defeat' && <section className="result-screen defeat"><span className="eyebrow">ACTION INTERRUPTED</span><h1>行动暂时中止</h1><p>污染值不是道德分数。调整构筑与移动节奏，再来一次。</p><button className="primary-button" onClick={() => { setPhase('briefing'); setBuilds([]); setAnswer(null); setCorrect(false); setSystemIndex(0); setCorrectSystems(0); setPurified(0); setMetrics({ hp: 100, maxHp: 100, pollution: 68, value: 0, accuracy: 100, combo: 0, finisher: 0, stage: 0, totalStages: 5 }) }}>重新整备</button></section>}
   </div>
 }
