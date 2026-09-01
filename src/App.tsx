@@ -13,6 +13,9 @@ import SkillTreeScreen from './screens/SkillTreeScreen'
 import { loadActiveProfile, logout, resetEventProfile, saveProfile } from './store/profile'
 import { resumeAudio, setMasterVolume, startMusic, stopMusic, type MusicScene } from './store/audio'
 import type { PlayerProfile, Screen } from './types'
+import { assetUrl } from './utils/assets'
+
+interface SceneTransition { label: string; screen: Screen; art: string }
 
 const AdventureScreen = lazy(() => import('./screens/AdventureScreen'))
 
@@ -22,7 +25,7 @@ export default function App() {
   const [immersive, setImmersive] = useState(false)
   const [toast, setToast] = useState<ToastMessage | null>(null)
   const [eventCountdown, setEventCountdown] = useState<number | null>(null)
-  const [transitionLabel, setTransitionLabel] = useState<string | null>(null)
+  const [transition, setTransition] = useState<SceneTransition | null>(null)
   const transitionTimers = useRef<number[]>([])
 
   useEffect(() => {
@@ -67,12 +70,13 @@ export default function App() {
   const navigate = (next: Screen) => {
     if (next === screen) return
     const labels: Record<Screen, string> = { start: '启动', hub: '循环基地', adventure: '城市行动', museum: '价值展馆', theater: '循环剧场', training: '系统训练', profile: '行动档案', equipment: '装备工坊', skills: '循环能力', exchange: '现实兑换' }
+    const arts: Partial<Record<Screen, string>> = { hub: 'art/cinematic/shanghai-loop-opening.webp', adventure: 'art/scenes/event-hall.png', museum: 'art/covers/public-action.png', theater: 'art/theater/themes/dujiangyan.webp', training: 'art/covers/core-worlds.png', equipment: 'art/legacy/generated/arena.png', skills: 'art/covers/pollution-shell.png', exchange: 'art/covers/public-action.png', profile: 'art/cinematic/shanghai-loop-opening.webp' }
     if (profile?.settings.reducedMotion) { setImmersive(false); setScreen(next); window.scrollTo({ top: 0 }); return }
     transitionTimers.current.forEach(window.clearTimeout)
-    setTransitionLabel(labels[next])
+    setTransition({ label: labels[next], screen: next, art: assetUrl(arts[next] ?? 'art/cinematic/shanghai-loop-opening.webp') })
     transitionTimers.current = [
-      window.setTimeout(() => { setImmersive(false); setScreen(next); window.scrollTo({ top: 0 }) }, 210),
-      window.setTimeout(() => { setTransitionLabel(null); transitionTimers.current = [] }, 720),
+      window.setTimeout(() => { setImmersive(false); setScreen(next); window.scrollTo({ top: 0 }) }, 310),
+      window.setTimeout(() => { setTransition(null); transitionTimers.current = [] }, 960),
     ]
   }
 
@@ -95,7 +99,7 @@ export default function App() {
 
   return <>
     <GameShell profile={profile} screen={screen} onNavigate={navigate} onSettingsChange={updateProfile} immersive={immersive || screen === 'hub'}>{content}</GameShell>
-    {transitionLabel && <div className="scene-transition" aria-hidden="true"><span /><div><small>ROUTE LINK</small><b>{transitionLabel}</b><i /></div></div>}
+    {transition && <div className="scene-transition" data-screen={transition.screen} aria-hidden="true" style={{ '--transition-art': `url(${transition.art})` } as React.CSSProperties}><span className="transition-art" /><span className="transition-scan" /><div className="transition-title"><small>ROUTE LINK / MATERIAL LOOP</small><b>{transition.label}</b><em>节点连接中</em><i /></div></div>}
     {eventCountdown !== null && <button className="event-countdown" onClick={() => setEventCountdown(null)}><b>{eventCountdown}</b><span>秒后清空展会存档并返回开始页<br />点击或按键即可继续本局</span></button>}
     <Toast message={toast} onDone={() => setToast(null)} />
   </>

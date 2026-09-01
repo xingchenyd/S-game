@@ -140,9 +140,9 @@ export default function HubScreen({ profile, onNavigate }: Props) {
       </div>
 
       <header className="world-hud">
-        <div className="world-identity"><span>LV.{profile.level}</span><b>{profile.username}</b><small>循环基地 · 上海站</small></div>
+        <button className="world-brand" aria-label="S-GAME 循环基地"><img src={assetUrl('art/brand/s-game-logo-v2.webp')} alt="S-GAME" /><small>循环基地 · 上海站</small></button>
         <div className="world-objective"><GameIcon name="prototype" size={42} /><span><small>当前行动</small><b>前往城市行动门，调查新的污染外壳</b></span></div>
-        <div className="world-currency">稳定原型 <b>{profile.prototypes.length}</b><span>◈ {profile.points}</span></div>
+        <div className="world-player-status"><span><small>等级</small><b>LV.{profile.level}</b></span><span><small>稳定原型</small><b>{profile.prototypes.length}</b></span><span><small>行动积分</small><b>{profile.points}</b></span><strong><GameIcon name="user" size={25} />{profile.username}</strong></div>
       </header>
 
       <div className={`world-interaction ${nearest ? 'is-ready' : ''}`}>

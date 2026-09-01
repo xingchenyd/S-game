@@ -15,11 +15,18 @@ export default function StartScreen({ onLogin }: { onLogin: (profile: PlayerProf
   const [slide, setSlide] = useState(0)
   const [username, setUsername] = useState('')
   const [error, setError] = useState('')
+  const [introOpen, setIntroOpen] = useState(true)
   const users = listUsers().slice(0, 3)
 
   useEffect(() => {
     const timer = window.setInterval(() => setSlide((value) => (value + 1) % covers.length), 3000)
     return () => window.clearInterval(timer)
+  }, [])
+
+  useEffect(() => {
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const timer = window.setTimeout(() => setIntroOpen(false), reduced ? 450 : 4200)
+    return () => window.clearTimeout(timer)
   }, [])
 
   const enter = (name = username) => {
@@ -33,6 +40,13 @@ export default function StartScreen({ onLogin }: { onLogin: (profile: PlayerProf
 
   return (
     <div className="start-screen">
+      {introOpen && <section className="opening-cinematic" aria-label="S-GAME 开场动画">
+        <div className="opening-backdrop" />
+        <div className="opening-route route-one" /><div className="opening-route route-two" />
+        <div className="opening-particles" />
+        <div className="opening-logo-lockup"><img src={assetUrl('art/brand/s-game-logo-v2.webp')} alt="S-GAME" /><span>城市材料回路正在连接</span><i /></div>
+        <button onClick={() => setIntroOpen(false)}>跳过开场</button>
+      </section>}
       <div className="cover-stack" aria-live="polite">
         {covers.map((cover, index) => <img key={cover.src} className={index === slide ? 'active' : ''} src={cover.src} alt={cover.line} />)}
       </div>
@@ -42,7 +56,7 @@ export default function StartScreen({ onLogin }: { onLogin: (profile: PlayerProf
 
       <section className="login-panel">
         <div className="title-lockup">
-          <span className="title-kicker">S-GAME / 废料环线</span>
+          <span className="title-kicker">S-GAME / 城市材料行动</span>
           <h1>守住价值<br /><em>不是垃圾。</em></h1>
           <p><strong>{covers[slide].eyebrow}</strong> · {covers[slide].line}</p>
         </div>

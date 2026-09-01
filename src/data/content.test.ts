@@ -42,7 +42,8 @@ describe('game content integrity', () => {
   })
 
   it('keeps theater stories substantial and interactive', () => {
-    expect(stories).toHaveLength(40)
+    expect(stories).toHaveLength(46)
+    expect(new Set(stories.map((story) => story.theme))).toEqual(new Set(['shanghai', 'dujiangyan', 'heidushan']))
     for (const story of stories) {
       expect(story.beats.length).toBeGreaterThanOrEqual(8)
       expect(story.beats.filter((beat) => beat.choices && beat.choices.length >= 2).length).toBeGreaterThanOrEqual(2)

@@ -15,12 +15,19 @@ const covers: Record<WasteType, string> = {
   textile: `${legacy}/generated/bg_textile.png`,
 }
 const guide = assetUrl('art/characters/loop-guide.png')
+const themeCovers = {
+  dujiangyan: assetUrl('art/theater/themes/dujiangyan.webp'),
+  heidushan: assetUrl('art/theater/themes/heidushan.webp'),
+}
 
 export const knowledgeSources: KnowledgeSource[] = [
   { id: 'sh-guide-2024', title: '上海市生活垃圾分类投放指引（2024版）', publisher: '上海市绿化和市容管理局', url: 'https://lhsr.sh.gov.cn/srgl/20240806/40b9feaa-53db-472f-8a6b-2c3cf0465def.html', scope: '上海生活垃圾分类、清洁干燥、容器和投放要求', checkedAt: '2026-09-01' },
   { id: 'sh-regulation', title: '上海市生活垃圾管理条例', publisher: '上海市绿化和市容管理局', url: 'https://lhsr.sh.gov.cn/gggs/20190219/0039-E2825314-7F1A-4D9D-9FA5-5C70894C2776.html', scope: '上海四分类定义、管理责任和大件垃圾流转', checkedAt: '2026-09-01' },
   { id: 'weee-regulation', title: '废弃电器电子产品回收处理管理条例', publisher: '中华人民共和国生态环境部', url: 'https://www.mee.gov.cn/ywgz/fgbz/xzfg/201909/t20190918_734319.shtml', scope: '废弃电器电子产品的规范回收处理与资源综合利用', checkedAt: '2026-09-01' },
   { id: 'battery-standard', title: '废锂离子动力蓄电池处理污染控制技术规范（试行）', publisher: '中华人民共和国生态环境部', url: 'https://www.mee.gov.cn/ywgz/fgbz/bz/bzwb/gthw/qtxgbz/202108/t20210820_858544.shtml', scope: '专业处理环节的污染控制；剧情不将其简化为居民投放口令', checkedAt: '2026-09-01' },
+  { id: 'unesco-dujiangyan', title: '青城山—都江堰世界遗产资料', publisher: '联合国教科文组织世界遗产中心', url: 'https://whc.unesco.org/en/list/1001', scope: '都江堰无坝引水体系、鱼嘴—飞沙堰—宝瓶口协同与活态遗产保护', checkedAt: '2026-09-01' },
+  { id: 'heidushan-protection', title: '黑独山地质遗迹保护立法调研', publisher: '青海人大', url: 'https://www.qhrd.gov.cn/gzdt/lfgz/202604/t20260410_232367.html', scope: '黑独山地质遗迹保护现状、管理边界与生态旅游治理', checkedAt: '2026-09-01' },
+  { id: 'heidushan-zoning', title: '黑独山游览区分区管理报道', publisher: '生态中国网（来源：央视新闻）', url: 'https://www.eco.gov.cn/news_info/60901.html', scope: '游览区、缓冲区、禁游区和避免踩踏脆弱黑色风化表层', checkedAt: '2026-09-01' },
 ]
 
 interface StorySeed {
@@ -44,6 +51,8 @@ interface StorySeed {
   goals: string[]
   tags: string[]
   sources?: string[]
+  theme?: StoryDefinition['theme']
+  cover?: string
 }
 
 const countStory = (beats: StoryBeat[]) => beats.reduce((sum, beat) => sum + beat.text.length + (beat.choices?.reduce((choiceSum, choice) => choiceSum + choice.text.length + choice.reply.length, 0) ?? 0), 0)
@@ -67,7 +76,7 @@ const makeStory = (seed: StorySeed): StoryDefinition => {
   ]
   return {
     id: seed.id, title: seed.title, subtitle: seed.subtitle, location: seed.location, duration: '约 2–3 分钟', type: seed.type,
-    cover: covers[seed.type], beats, tags: seed.tags, learningGoals: seed.goals,
+    theme: seed.theme ?? 'shanghai', cover: seed.cover ?? covers[seed.type], beats, tags: seed.tags, learningGoals: seed.goals,
     sourceIds: seed.sources ?? ['sh-guide-2024', 'sh-regulation'], reviewStatus: '资料初审', estimatedCharacters: countStory(beats),
   }
 }
@@ -124,4 +133,16 @@ const textileSeeds: StorySeed[] = [
   { id: 't10-exhibit-shirt', title: '一件T恤的活动日期', subtitle: '公益周边不应成为负担', location: '世博园 · 公益展会', type: 'textile', object: '活动纪念T恤', opening: '活动结束，印着具体日期的纪念T恤还剩三百件，仓库没有下一场用途。', history: '我本想承载公益记忆，却因为过量预估、单一尺码和强时效图案成为新的库存。', dilemma: '公益身份不能自动抵消物料浪费，预售、按需制作和无日期设计更负责任。', safeAction: '盘点尺码和需求，优先内部长期使用，并复盘下一次按需制作', unsafeAction: '立刻免费大量寄送，不确认对方是否需要', consequence: '无需求的赠送只是把库存和处理责任转移给接收者。', systemView: '周边应有数量上限、领取意愿、长期用途和剩余处理方案，甚至可以选择不制作。', secondQuestion: '下一次纪念品设计最重要的改变是什么？', betterChoice: '让玩家自主兑换少量耐用物品，提供数字纪念并按需生产', temptingChoice: '准备更多款式提高曝光，剩余再统一捐赠', ending: '库存被用于工作人员长期服装，下一场活动把默认奖励改成数字护照，实物只为主动选择的人制作。', goals: ['公益物料也需减量', '按需生产', '赠送前确认需求'], tags: ['展会', '纪念品', '按需生产'] },
 ]
 
-export const stories: StoryDefinition[] = [...electronicSeeds, ...plasticSeeds, ...paperSeeds, ...textileSeeds].map(makeStory)
+const dujiangyanSeeds: StorySeed[] = [
+  { id: 'd01-three-gates', title: '一条河的三次选择', subtitle: '鱼嘴、飞沙堰与宝瓶口不是三道孤立机关', location: '四川 · 都江堰水利工程', type: 'paper', theme: 'dujiangyan', cover: themeCovers.dujiangyan, object: '水位记录牌', opening: '清晨水雾刚散，研学队拿到三张机关卡，争着把“最重要”贴到其中一处。', history: '我记录的不是谁单独制服河流，而是鱼嘴分水、飞沙堰泄洪排沙、宝瓶口控制引水如何随地形与水势协同。', dilemma: '如果把活态水利系统讲成一个按钮或一位英雄，玩家会记住名词，却看不见相互依赖与持续维护。', safeAction: '沿既有参观路线观察三处关系，再用水流模型验证协同', unsafeAction: '只在最出片的位置停留，把另外两处当作背景', consequence: '都江堰的教育价值来自系统关系：分流、排沙、泄洪和引水不能被拆成互不相干的景点。', systemView: '两千多年持续运作并不意味着工程无需照料，测量、岁修、管理与对自然条件的理解共同维持功能。', secondQuestion: '怎样把这段知识变成游戏机制而不只是答题？', betterChoice: '让玩家在不同水情下联动三个节点，并承担只强化一处的后果', temptingChoice: '把三个节点做成三个伤害更高的按钮', ending: '三张机关卡被拼成一条闭合水路，队员最后说出的关键词不是“最强”，而是“协同”。', goals: ['理解三大主体工程的协同', '认识顺应地形的无坝引水思想', '把维护视为系统的一部分'], tags: ['水利', '协同', '活态遗产'], sources: ['unesco-dujiangyan'] },
+  { id: 'd02-sediment-letter', title: '泥沙不是敌人', subtitle: '从“全部清除”到让水自己工作', location: '四川 · 飞沙堰观察点', type: 'plastic', theme: 'dujiangyan', cover: themeCovers.dujiangyan, object: '沉积物样本瓶', opening: '体验台上的警报写着“泥沙污染率100%”，玩家下意识准备启动最大功率过滤器。', history: '河流携带泥沙是自然过程，真正的问题是泥沙在不合适的位置和时机累积；工程利用水势排沙，而不是把整条河变成静止的透明管道。', dilemma: '把所有自然变化都画成红色污染，会误导玩家把生态治理等同于彻底清除。', safeAction: '比较流速、弯道与分流后的沉积位置，再调整导流比例', unsafeAction: '锁死所有水口，追求画面里没有一粒泥沙', consequence: '系统需要给水与泥沙留下路径，单纯追求“看起来最干净”可能让淤积和洪水风险转移到别处。', systemView: '好的环境玩法不能只有清零指标，还要同时呈现安全、供水、排沙和对下游的影响。', secondQuestion: '关卡评分应该奖励什么？', betterChoice: '综合评价分水稳定、排沙效果、下游影响与操作次数', temptingChoice: '只看水面颜色越蓝越高分', ending: '警报从“清除泥沙”改成“保持通道”，透明样本瓶旁多了一张说明：自然物质不等于污染物。', goals: ['区分自然泥沙与污染', '理解借水势排沙', '避免单一视觉指标误导'], tags: ['泥沙', '系统指标', '飞沙堰'], sources: ['unesco-dujiangyan'] },
+  { id: 'd03-maintenance-calendar', title: '岁修日历缺了一页', subtitle: '活态遗产不是被封存的旧机器', location: '四川 · 都江堰研学工坊', type: 'textile', theme: 'dujiangyan', cover: themeCovers.dujiangyan, object: '维修绳结', opening: '展柜里摆着一段磨损绳结，标签只写着“古代工具”，旁边的现代巡检表却无人翻看。', history: '材料和工具会变化，但观察水情、发现磨损、安排维护和留下记录始终重要；活态遗产的价值正在持续使用中。', dilemma: '如果剧情只赞叹古代智慧，玩家会以为保护就是不碰、不改，也会忽略今天维护者的专业劳动。', safeAction: '把历史工具与现代巡检记录并排比较，找出功能延续与方法变化', unsafeAction: '把所有新材料都藏起来，让展览看起来更“古老”', consequence: '真实性不等于假装时间停止，保护需要记录变化、遵循规范并让必要维护可追溯。', systemView: '城市循环同样需要日常维护：容器、维修点、运输记录和人员培训，比一次大型清理更能守住长期效果。', secondQuestion: '玩家完成关卡后，哪种成果更有教育意义？', betterChoice: '获得一份可回看的维护日志，显示预防了哪些故障', temptingChoice: '只发一枚写着“拯救古迹”的夸张勋章', ending: '缺页被补上，日历同时写入过去与今天；你带走的不是英雄称号，而是一套如何照看系统的观察方法。', goals: ['理解活态遗产与持续维护', '尊重当代专业管理', '用可追溯记录替代口号'], tags: ['维护', '遗产', '记录'], sources: ['unesco-dujiangyan'] },
+]
+
+const heidushanSeeds: StorySeed[] = [
+  { id: 'h01-track-that-stays', title: '一条不会消失的车辙', subtitle: '“我只开一次”为什么会变成路线', location: '青海 · 黑独山游览区', type: 'electronic', theme: 'heidushan', cover: themeCovers.heidushan, object: '路线记录器', opening: '屏幕上的导航建议抄近路进入黑色山体，一辆车已经在前方留下两道浅浅的印。', history: '脆弱风化表层并不会因为车辆离开就立刻恢复，后来者还可能把第一条痕迹误认成可通行道路。', dilemma: '玩家想完成限时收集，却发现目标点位于管理线外，时间奖励正在诱导越界。', safeAction: '留在开放路线并报告点位，让目标改为远距离记录', unsafeAction: '沿现有车辙进入，认为反正已经有人走过', consequence: '一条痕迹会引导更多痕迹；遵守分区和既有路线不是少玩内容，而是关卡的核心胜利条件。', systemView: '黑独山正在通过游览区、缓冲区与禁游区等方式减少无序踩踏，游戏必须把边界画清楚并取消越界收益。', secondQuestion: '如何设计困难模式而不鼓励冒险破坏？', betterChoice: '增加观察、天气与资源管理难度，但越界始终直接判定任务失败', temptingChoice: '困难模式允许走禁区捷径，只扣少量积分', ending: '倒计时归零时你没有拿到那件收集物，却保住了零新增痕迹的最高评价；任务日志把“克制”记作主动行动。', goals: ['理解车辙的累积影响', '遵守分区与路线', '游戏奖励不诱导越界'], tags: ['车辙', '分区', '克制'], sources: ['heidushan-protection', 'heidushan-zoning'] },
+  { id: 'h02-stone-in-pocket', title: '口袋里少掉的黑色', subtitle: '纪念品不能从地貌上拿走', location: '青海 · 黑独山缓冲区', type: 'paper', theme: 'heidushan', cover: themeCovers.heidushan, object: '黑色岩屑', opening: '离场前，一名游客把几块黑色碎石装进口袋，说这么小的东西不会改变一座山。', history: '黑色风化表层正是景观的一部分，捡拾、踩踏和反复触碰会把“每人一点点”累积成可见损伤。', dilemma: '游戏的收藏系统若奖励真实捡拾，会把教育目标彻底反转。', safeAction: '原地放回且不继续翻动，改用数字材料护照记录观察', unsafeAction: '多捡几块带回活动现场做公益展示', consequence: '自然地貌不是免费素材库，纪念应来自不取走实物的观察、影像与经过授权的模型。', systemView: 'S-GAME的稳定原型是污染外壳被净化后的虚构凭证，现实兑换必须使用可追溯材料制作，绝不能仿照从保护地采集。', secondQuestion: '最合适的线下纪念品是什么？', betterChoice: '用回收材料制作经授权的抽象纹理章，并附上不采集承诺', temptingChoice: '把真实黑色碎石封进树脂，强调每件独一无二', ending: '碎石留在原处，数字护照新增一枚“零取走”印记；你带走的是观察坐标和保护承诺。', goals: ['不捡拾地表物', '收藏系统不反向激励', '实物纪念采用可追溯材料'], tags: ['捡拾', '纪念品', '材料护照'], sources: ['heidushan-protection', 'heidushan-zoning'] },
+  { id: 'h03-cleanup-boundary', title: '围线外的塑料袋', subtitle: '热心行动也要服从在地管理', location: '青海 · 黑独山资料站', type: 'plastic', theme: 'heidushan', cover: themeCovers.heidushan, object: '被风吹走的包装袋', opening: '一只包装袋越过围线挂在坡面，志愿者直播已经打开，评论催促他马上冲过去捡。', history: '我确实不该留在这里，但未经许可越线可能扩大踩踏、让更多人模仿，也可能在强风和陌生地形中伤人。', dilemma: '“看到垃圾就捡”在城市公园常常合理，在受管理的脆弱地貌中却必须先判断权限、路线与安全。', safeAction: '记录准确位置和风向，通知现场管理人员按既有路线处理', unsafeAction: '为了直播效果直接翻越围线追赶', consequence: '不越界不是袖手旁观，而是把行动交给掌握现场条件、权限和装备的人。', systemView: '公益活动在出发前就应与管理方约定人数、区域、撤场、废物回收和突发情况，不把现场当作自由任务地图。', secondQuestion: '怎样向观众解释这次“没有亲手捡到”？', betterChoice: '公开判断依据和后续交接状态，让克制与协作同样可见', temptingChoice: '剪掉等待片段，假装是自己完成清理以获得点赞', ending: '工作人员从开放路径完成回收，任务记录保留了报告时间、处置回执与零越线数据，公益从表演变成可核验协作。', goals: ['清理行动服从现场边界', '记录并交接而非冒险', '公益成果可核验'], tags: ['无痕行动', '志愿者', '交接'], sources: ['heidushan-protection', 'heidushan-zoning'] },
+]
+
+export const stories: StoryDefinition[] = [...electronicSeeds, ...plasticSeeds, ...paperSeeds, ...textileSeeds, ...dujiangyanSeeds, ...heidushanSeeds].map(makeStory)

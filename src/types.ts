@@ -178,6 +178,7 @@ export interface StoryDefinition {
   location: string
   duration: string
   type: WasteType
+  theme: 'shanghai' | 'dujiangyan' | 'heidushan'
   cover: string
   beats: StoryBeat[]
   tags: string[]

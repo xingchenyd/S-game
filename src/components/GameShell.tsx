@@ -2,6 +2,7 @@ import { useEffect, useState, type ReactNode } from 'react'
 import type { PlayerProfile, Screen } from '../types'
 import PixelIcon from './PixelIcon'
 import GameIcon from './GameIcon'
+import { assetUrl } from '../utils/assets'
 
 interface Props {
   children: ReactNode
@@ -46,12 +47,12 @@ export default function GameShell({ children, profile, screen, onNavigate, onSet
       {!immersive && (
         <header className="top-rail">
           <button className="brand-chip" onClick={() => onNavigate('hub')} aria-label="返回基地">
-            <span className="brand-mark">S</span><span>废料环线</span>
+            <img className="brand-logo" src={assetUrl('art/brand/s-game-logo-v2.webp')} alt="S-GAME" />
           </button>
           <div className="player-chip">
-            <span className="level-badge">LV.{profile.level}</span>
-            <strong>{profile.username}</strong>
-            <span className="currency">◈ {profile.points}</span>
+            <span className="level-badge"><GameIcon name="skills" size={28} /><small>等级</small><b>LV.{profile.level}</b></span>
+            <span className="currency"><GameIcon name="value" size={28} /><small>行动积分</small><b>{profile.points}</b></span>
+            <strong className="player-name"><GameIcon name="user" size={28} />{profile.username}</strong>
           </div>
         </header>
       )}
