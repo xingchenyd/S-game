@@ -24,8 +24,10 @@ export default function AdventureScreen({ profile, onChange, onImmersive }: Prop
   const [challenge] = useState(() => classificationChallenges[Math.floor(Math.random() * classificationChallenges.length)])
   const [answer, setAnswer] = useState<number | null>(null)
   const [correct, setCorrect] = useState(false)
+  const [systemIndex, setSystemIndex] = useState(0)
+  const [correctSystems, setCorrectSystems] = useState(0)
   const buildOptions = useMemo(() => [...buildCards].sort(() => Math.random() - .5).slice(0, 3), [phase === 'build'])
-  const routeMode = selected?.modes?.[Math.min(builds.length, (selected.modes?.length ?? 1) - 1)]
+  const routeMode = selected?.modes?.[Math.min(systemIndex, (selected.modes?.length ?? 1) - 1)]
   const modeDesign = routeMode ? getPlayMode(routeMode) : undefined
   const modeRound = routeMode ? modeSimulations.find((simulation) => simulation.modeId === routeMode)?.rounds[0] : undefined
   const prototypeCollectibleId = getPrototypeCollectibleId(selected?.id ?? 'unknown')
@@ -42,13 +44,20 @@ export default function AdventureScreen({ profile, onChange, onImmersive }: Prop
     if (answer !== null) return
     const isCorrect = index === (modeRound?.best ?? challenge.answer)
     setAnswer(index); setCorrect(isCorrect)
-    setMetrics((m) => ({ ...m, pollution: Math.max(0, m.pollution - (isCorrect ? (builds.includes('clean') ? 22 : 12) : 2)), accuracy: isCorrect ? 100 : 0, value: m.value + (isCorrect ? 35 : 8), stage: 3 }))
+    if (isCorrect) setCorrectSystems((value) => value + 1)
+    const modeCount = Math.max(1, selected?.modes?.length ?? 1)
+    setMetrics((m) => ({ ...m, pollution: Math.max(0, m.pollution - (isCorrect ? 10 : 1)), accuracy: Math.round(((correctSystems + (isCorrect ? 1 : 0)) / (systemIndex + 1)) * 100), value: m.value + (isCorrect ? 22 : 5), stage: 2 + (systemIndex + 1) / modeCount }))
+  }
+  const advanceSystem = () => {
+    const finalSystem = systemIndex >= (selected?.modes?.length ?? 1) - 1
+    if (finalSystem) { setPhase('build'); return }
+    setSystemIndex((value) => value + 1); setAnswer(null); setCorrect(false)
   }
   const chooseBuild = (id: string) => { setBuilds((value) => [...value, id]); startMusic('boss', musicVolume); setPhase('boss'); setMetrics((m) => ({ ...m, stage: 4 })) }
   const finish = (result: BattleResult) => {
     if (!selected) return
     const multiplier = difficulty === 'challenge' ? 1.5 : difficulty === 'experience' ? .8 : 1
-    const points = Math.round((result.value + (correct ? 50 : 15)) * multiplier)
+    const points = Math.round((result.value + correctSystems * 18 + (correctSystems === 0 ? 8 : 0)) * multiplier)
     const prototypeId = getPrototypeCollectibleId(selected.id)
     const next = {
       ...profile,
@@ -62,8 +71,8 @@ export default function AdventureScreen({ profile, onChange, onImmersive }: Prop
         runs: profile.stats.runs + 1,
         victories: profile.stats.victories + 1,
         enemiesPurified: profile.stats.enemiesPurified + purified + result.purified,
-        classificationTotal: profile.stats.classificationTotal + 1,
-        classificationCorrect: profile.stats.classificationCorrect + (correct ? 1 : 0),
+        classificationTotal: profile.stats.classificationTotal + Math.max(1, selected.modes?.length ?? 1),
+        classificationCorrect: profile.stats.classificationCorrect + correctSystems,
         bestPollution: Math.min(profile.stats.bestPollution, metrics.pollution),
         valuePreserved: profile.stats.valuePreserved + points,
       },
@@ -74,7 +83,7 @@ export default function AdventureScreen({ profile, onChange, onImmersive }: Prop
     setPhase('result')
     onImmersive(false)
   }
-  const reset = () => { startMusic('adventure', musicVolume); setSelected(null); setPhase('briefing'); setBuilds([]); setAnswer(null); setCorrect(false); setPurified(0); setMetrics({ hp: 100, maxHp: 100, pollution: 68, value: 0, accuracy: 100, combo: 0, finisher: 0, stage: 0, totalStages: 5 }); onImmersive(false) }
+  const reset = () => { startMusic('adventure', musicVolume); setSelected(null); setPhase('briefing'); setBuilds([]); setAnswer(null); setCorrect(false); setSystemIndex(0); setCorrectSystems(0); setPurified(0); setMetrics({ hp: 100, maxHp: 100, pollution: 68, value: 0, accuracy: 100, combo: 0, finisher: 0, stage: 0, totalStages: 5 }); onImmersive(false) }
 
   if (!selected) return <div className="adventure-select screen-enter">
     <header className="page-title"><div><span className="eyebrow">ACTION ROUTES / SHANGHAI</span><h1>选择城市行动</h1><p>每条路线把战斗、处理决策和Boss原型串成一次完整价值保留行动。</p></div></header>
@@ -113,15 +122,15 @@ export default function AdventureScreen({ profile, onChange, onImmersive }: Prop
     </>}
 
     {phase === 'classify' && <section className="decision-overlay">
-      <div className="decision-card pixel-panel"><span className="eyebrow">系统节点 · {modeDesign?.name ?? '材料判断'}</span><div className="item-orb">{modeDesign?.icon ?? challenge.icon}</div><h2>{modeRound?.object ?? challenge.item}</h2><p>{modeRound?.situation ?? challenge.prompt}</p>
+      <div className="decision-card pixel-panel"><span className="eyebrow">系统节点 {systemIndex + 1}/{selected.modes?.length ?? 1} · {modeDesign?.name ?? '材料判断'}</span><div className="item-orb">{modeDesign?.icon ?? challenge.icon}</div><h2>{modeRound?.object ?? challenge.item}</h2><p>{modeRound?.situation ?? challenge.prompt}</p>
         <div className="decision-options">{(modeRound?.options.map((option) => option.label) ?? challenge.options).map((option, index) => <button key={option} className={answer === null ? '' : index === (modeRound?.best ?? challenge.answer) ? 'correct' : answer === index ? 'wrong' : 'muted'} onClick={() => submitAnswer(index)}>{String.fromCharCode(65 + index)}. {option}</button>)}</div>
-        {answer !== null && <div className={`answer-feedback ${correct ? 'correct' : 'wrong'}`}><b>{correct ? '系统判断有效：后续路线被改善' : '本次选择产生了系统代价'}</b><p>{modeRound?.options[answer].feedback ?? challenge.explain}</p><em>{modeRound ? `教育原则 · ${modeRound.options[answer].principle}` : ''}</em><button className="primary-button" onClick={() => setPhase('build')}>进入构筑选择 <ChevronRight /></button></div>}
+        {answer !== null && <div className={`answer-feedback ${correct ? 'correct' : 'wrong'}`}><b>{correct ? '系统判断有效：后续路线被改善' : '本次选择产生了系统代价'}</b><p>{modeRound?.options[answer].feedback ?? challenge.explain}</p><em>{modeRound ? `教育原则 · ${modeRound.options[answer].principle}` : ''}</em><button className="primary-button" onClick={advanceSystem}>{systemIndex >= (selected.modes?.length ?? 1) - 1 ? '完成系统节点，进入构筑' : '进入下一套路线玩法'} <ChevronRight /></button></div>}
       </div>
     </section>}
 
     {phase === 'build' && <section className="decision-overlay"><div className="build-panel"><span className="eyebrow">本局升级 · 三选一</span><h2>把刚才的处理经验变成战斗能力</h2><div className="build-grid">{buildOptions.map((card) => <button key={card.id} onClick={() => chooseBuild(card.id)} style={{ '--card-color': card.color } as React.CSSProperties}><span>{card.tag}</span><b>{card.name}</b><p>{card.description}</p><small>选择并进入Boss节点</small></button>)}</div></div></section>}
 
-    {phase === 'result' && <section className="result-screen"><div className="prototype-orb"><img src="/art/legacy/sprites/item_print.png" alt="稳定原型" /></div><span className="eyebrow">POLLUTION SHELL CLEARED</span><h1>稳定原型已回收</h1><p>你没有消灭一件废物，而是拆除了让它失控的污染外壳。</p><div className="result-grid"><div><b>{metrics.value}</b><span>本局价值保留</span></div><div><b>{metrics.pollution}%</b><span>最终污染率</span></div><div><b>{correct ? '正确' : '待改进'}</b><span>处理判断</span></div></div><div className="prototype-ticket"><small>获得原型凭证 · {prototypeCollectibleId}</small><b>{selected.prototype}</b><span>可在现实兑换站查看纪念章 / 模型方案</span></div><button className="primary-button" onClick={reset}>返回行动地图</button></section>}
-    {phase === 'defeat' && <section className="result-screen defeat"><span className="eyebrow">ACTION INTERRUPTED</span><h1>行动暂时中止</h1><p>污染值不是道德分数。调整构筑与移动节奏，再来一次。</p><button className="primary-button" onClick={() => { setPhase('briefing'); setMetrics((m) => ({ ...m, hp: 100, stage: 0 })) }}>重新整备</button></section>}
+    {phase === 'result' && <section className="result-screen"><div className="prototype-orb"><img src="/art/legacy/sprites/item_print.png" alt="稳定原型" /></div><span className="eyebrow">POLLUTION SHELL CLEARED</span><h1>稳定原型已回收</h1><p>你没有消灭一件废物，而是拆除了让它失控的污染外壳。</p><div className="result-grid"><div><b>{metrics.value}</b><span>本局价值保留</span></div><div><b>{metrics.pollution}%</b><span>最终污染率</span></div><div><b>{correctSystems}/{selected.modes?.length ?? 1}</b><span>系统判断有效</span></div></div><div className="prototype-ticket"><small>获得原型凭证 · {prototypeCollectibleId}</small><b>{selected.prototype}</b><span>可在现实兑换站查看纪念章 / 模型方案</span></div><button className="primary-button" onClick={reset}>返回行动地图</button></section>}
+    {phase === 'defeat' && <section className="result-screen defeat"><span className="eyebrow">ACTION INTERRUPTED</span><h1>行动暂时中止</h1><p>污染值不是道德分数。调整构筑与移动节奏，再来一次。</p><button className="primary-button" onClick={() => { setPhase('briefing'); setBuilds([]); setAnswer(null); setCorrect(false); setSystemIndex(0); setCorrectSystems(0); setPurified(0); setMetrics({ hp: 100, maxHp: 100, pollution: 68, value: 0, accuracy: 100, combo: 0, finisher: 0, stage: 0, totalStages: 5 }) }}>重新整备</button></section>}
   </div>
 }
