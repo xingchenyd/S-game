@@ -1,0 +1,140 @@
+/* Facility color identities, shared construction language and responsive motion. */
+:root {
+  --ui-cyan: #39d9ff; --ui-blue: #4c7dff; --ui-violet: #9b65ff;
+  --ui-pink: #ff5e9e; --ui-orange: #ff8a34; --ui-yellow: #ffd84a;
+  --ui-lime: #9bea4b; --ui-red: #ff5c62;
+}
+
+.game-shell { --shell-accent: var(--ui-cyan); --shell-accent-2: var(--ui-blue); --shell-soft: #dff8ff; --shell-ink: #102c3d; }
+.screen-adventure { --shell-accent: var(--ui-orange); --shell-accent-2: var(--ui-red); --shell-soft: #fff0d5; }
+.screen-museum { --shell-accent: var(--ui-yellow); --shell-accent-2: var(--ui-orange); --shell-soft: #fff8cf; }
+.screen-theater { --shell-accent: var(--ui-violet); --shell-accent-2: var(--ui-pink); --shell-soft: #f2e8ff; }
+.screen-training { --shell-accent: var(--ui-lime); --shell-accent-2: #26b892; --shell-soft: #eaffd8; }
+.screen-equipment { --shell-accent: var(--ui-blue); --shell-accent-2: var(--ui-violet); --shell-soft: #e7efff; }
+.screen-skills { --shell-accent: var(--ui-cyan); --shell-accent-2: var(--ui-violet); --shell-soft: #e1f7ff; }
+.screen-campaign { --shell-accent: var(--ui-red); --shell-accent-2: var(--ui-orange); --shell-soft: #ffe5df; }
+.screen-exchange { --shell-accent: var(--ui-pink); --shell-accent-2: var(--ui-yellow); --shell-soft: #ffe5f1; }
+.screen-profile { --shell-accent: var(--ui-cyan); --shell-accent-2: var(--ui-lime); --shell-soft: #dffcf3; }
+
+.game-shell:not(.is-world) .game-content {
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--shell-accent) 10%, transparent) 1px, transparent 1px),
+    linear-gradient(color-mix(in srgb, var(--shell-accent-2) 8%, transparent) 1px, transparent 1px), #f5f3e8;
+  background-size: 32px 32px;
+}
+.game-shell:not(.is-world) .top-rail {
+  border-bottom-color: var(--shell-accent-2);
+  box-shadow: 0 5px 0 color-mix(in srgb, var(--shell-accent) 55%, #102c3d);
+}
+.game-shell:not(.is-world) .top-rail::after {
+  content: ''; position: absolute; inset: auto 0 -5px; height: 5px;
+  background: repeating-linear-gradient(90deg, var(--shell-accent) 0 38px, var(--shell-accent-2) 38px 52px, var(--ui-yellow) 52px 62px);
+  animation: rail-flow 8s linear infinite;
+}
+
+.game-shell:not(.is-world) .screen-enter > .page-title,
+.game-shell:not(.is-world) .screen-enter > header:first-child {
+  position: relative; isolation: isolate; overflow: hidden; border: 3px solid var(--shell-ink);
+  background: linear-gradient(120deg, #fff 0 62%, var(--shell-soft) 62% 100%);
+  box-shadow: 7px 7px 0 color-mix(in srgb, var(--shell-accent) 62%, var(--shell-ink));
+}
+.game-shell:not(.is-world) .screen-enter > .page-title::before,
+.game-shell:not(.is-world) .screen-enter > header:first-child::before {
+  content: ''; position: absolute; z-index: -1; top: -28px; right: 8%; width: 120px; height: 120px;
+  border: 18px solid color-mix(in srgb, var(--shell-accent) 58%, transparent); transform: rotate(45deg);
+  animation: title-orbit 12s linear infinite;
+}
+.game-shell:not(.is-world) .screen-enter > .page-title::after,
+.game-shell:not(.is-world) .screen-enter > header:first-child::after {
+  content: ''; position: absolute; inset: auto 0 0; height: 7px;
+  background: repeating-linear-gradient(90deg, var(--shell-accent) 0 48px, var(--shell-accent-2) 48px 76px, var(--ui-yellow) 76px 84px);
+}
+
+.game-shell:not(.is-world) .pixel-panel,
+.game-shell:not(.is-world) .panel {
+  border-color: color-mix(in srgb, var(--shell-ink) 86%, var(--shell-accent));
+  box-shadow: 5px 5px 0 color-mix(in srgb, var(--shell-accent) 34%, #17384b);
+  transition: transform .18s steps(3), box-shadow .18s steps(3), border-color .18s ease;
+}
+.game-shell:not(.is-world) .pixel-panel:hover,
+.game-shell:not(.is-world) .panel:hover {
+  border-color: var(--shell-accent-2);
+  box-shadow: 7px 7px 0 color-mix(in srgb, var(--shell-accent) 64%, #17384b);
+}
+
+.game-shell button, .game-shell [role='button'] {
+  position: relative; overflow: hidden;
+  transition: transform .14s steps(2), box-shadow .14s steps(2), filter .16s ease, background-color .16s ease;
+}
+.game-shell button::after, .game-shell [role='button']::after {
+  content: ''; pointer-events: none; position: absolute; top: 0; left: -45%; width: 25%; height: 100%;
+  background: rgba(255,255,255,.36); transform: skewX(-18deg); transition: left .35s ease;
+}
+.game-shell button:hover::after, .game-shell [role='button']:hover::after { left: 125%; }
+.game-shell button:hover { filter: saturate(1.14); }
+.game-shell button:active { transform: translate(3px, 3px) !important; box-shadow: 1px 1px 0 #102c3d !important; }
+.primary-button, .primary-action {
+  color: #102c3d !important; background: var(--ui-yellow) !important; border-color: #102c3d !important;
+  box-shadow: 4px 4px 0 var(--ui-orange) !important;
+}
+.secondary-button, .secondary-action {
+  color: #102c3d !important; background: var(--shell-accent) !important; border-color: #102c3d !important;
+  box-shadow: 4px 4px 0 var(--shell-accent-2) !important;
+}
+.dock button.active {
+  color: #0b2534; background: var(--shell-accent); border-color: #0b2534;
+  box-shadow: 0 -4px 0 var(--shell-accent-2) inset;
+}
+
+.screen-theater .story-card:nth-child(4n + 1) { --story-color: var(--ui-violet); }
+.screen-theater .story-card:nth-child(4n + 2) { --story-color: var(--ui-pink); }
+.screen-theater .story-card:nth-child(4n + 3) { --story-color: var(--ui-cyan); }
+.screen-theater .story-card:nth-child(4n) { --story-color: var(--ui-orange); }
+.screen-theater .story-card {
+  border-top: 7px solid var(--story-color, var(--shell-accent));
+  background: linear-gradient(145deg, #fff 72%, color-mix(in srgb, var(--story-color, var(--shell-accent)) 22%, #fff) 72%);
+}
+.screen-training .mode-card:nth-child(3n + 1) { --mode-color: var(--ui-lime); }
+.screen-training .mode-card:nth-child(3n + 2) { --mode-color: var(--ui-orange); }
+.screen-training .mode-card:nth-child(3n) { --mode-color: var(--ui-cyan); }
+.screen-training .mode-card {
+  background: linear-gradient(135deg, #fff 66%, color-mix(in srgb, var(--mode-color, var(--shell-accent)) 30%, #fff) 66%);
+  border-left: 8px solid var(--mode-color, var(--shell-accent));
+}
+.screen-equipment .gear-card:nth-child(4n + 1), .screen-exchange .reward-card:nth-child(4n + 1) { --card-color: var(--ui-blue); }
+.screen-equipment .gear-card:nth-child(4n + 2), .screen-exchange .reward-card:nth-child(4n + 2) { --card-color: var(--ui-pink); }
+.screen-equipment .gear-card:nth-child(4n + 3), .screen-exchange .reward-card:nth-child(4n + 3) { --card-color: var(--ui-lime); }
+.screen-equipment .gear-card:nth-child(4n), .screen-exchange .reward-card:nth-child(4n) { --card-color: var(--ui-orange); }
+.screen-equipment .gear-card, .screen-exchange .reward-card {
+  border-bottom: 7px solid var(--card-color, var(--shell-accent));
+  background: linear-gradient(150deg, #fff 65%, color-mix(in srgb, var(--card-color, var(--shell-accent)) 19%, #fff) 65%);
+}
+.screen-museum .album-shell {
+  background: linear-gradient(135deg, #173a55 0 52%, #234f68 52% 100%);
+  border-color: var(--ui-yellow); box-shadow: 8px 8px 0 var(--ui-orange);
+}
+.screen-museum .collection-card:nth-child(3n + 1) { --museum-color: var(--ui-yellow); }
+.screen-museum .collection-card:nth-child(3n + 2) { --museum-color: var(--ui-cyan); }
+.screen-museum .collection-card:nth-child(3n) { --museum-color: var(--ui-pink); }
+.screen-museum .collection-card { border-color: var(--museum-color, var(--ui-yellow)); }
+.screen-profile .stats-board article:nth-child(4n + 1) { background: #dff8ff; border-top-color: var(--ui-cyan); }
+.screen-profile .stats-board article:nth-child(4n + 2) { background: #fff0d5; border-top-color: var(--ui-orange); }
+.screen-profile .stats-board article:nth-child(4n + 3) { background: #f0e7ff; border-top-color: var(--ui-violet); }
+.screen-profile .stats-board article:nth-child(4n) { background: #eaffd8; border-top-color: var(--ui-lime); }
+
+.game-shell:not(.is-world) .screen-enter > * { animation: panel-arrive .36s cubic-bezier(.2,.8,.2,1) both; }
+.game-shell:not(.is-world) .screen-enter > *:nth-child(2) { animation-delay: .05s; }
+.game-shell:not(.is-world) .screen-enter > *:nth-child(3) { animation-delay: .1s; }
+.game-shell:not(.is-world) .screen-enter > *:nth-child(4) { animation-delay: .15s; }
+@keyframes panel-arrive { from { opacity: 0; transform: translateY(12px) scale(.99); } to { opacity: 1; transform: none; } }
+@keyframes title-orbit { to { transform: rotate(405deg); } }
+@keyframes rail-flow { to { background-position-x: 124px; } }
+
+@media (max-width: 680px) {
+  .game-shell:not(.is-world) .screen-enter > .page-title,
+  .game-shell:not(.is-world) .screen-enter > header:first-child {
+    box-shadow: 4px 4px 0 color-mix(in srgb, var(--shell-accent) 62%, var(--shell-ink));
+  }
+  .game-shell:not(.is-world) .pixel-panel,
+  .game-shell:not(.is-world) .panel { box-shadow: 3px 3px 0 color-mix(in srgb, var(--shell-accent) 34%, #17384b); }
+}

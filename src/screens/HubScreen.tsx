@@ -121,7 +121,7 @@ export default function HubScreen({ profile, onNavigate }: Props) {
   }
   const holdDirection = (key: string) => ({
     onPointerDown: (event: ReactPointerEvent<HTMLButtonElement>) => { event.currentTarget.setPointerCapture(event.pointerId); held.current.add(key); target.current = null },
-    onPointerUp: () => held.current.delete(key), onPointerCancel: () => held.current.delete(key), onPointerLeave: () => held.current.delete(key),
+    onPointerUp: () => held.current.delete(key), onPointerCancel: () => held.current.delete(key),
   })
 
   return <div className="base-world-screen screen-enter">

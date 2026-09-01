@@ -42,7 +42,7 @@ export default function GameShell({ children, profile, screen, onNavigate, onSet
   }
 
   return (
-    <div className={`game-shell ${immersive ? 'is-immersive' : ''} ${screen === 'hub' ? 'is-world' : ''} ${profile.settings.highContrast ? 'high-contrast' : ''}`}>
+    <div className={`game-shell screen-${screen} ${immersive ? 'is-immersive' : ''} ${screen === 'hub' ? 'is-world' : ''} ${profile.settings.highContrast ? 'high-contrast' : ''}`}>
       {!immersive && (
         <header className="top-rail">
           <button className="brand-chip" onClick={() => onNavigate('hub')} aria-label="返回基地">

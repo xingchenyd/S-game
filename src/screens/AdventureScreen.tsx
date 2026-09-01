@@ -1,4 +1,4 @@
-import { ArrowLeft, Check, ChevronRight, Gauge, Heart, LockKeyhole, MapPinned, ShieldAlert, Sparkles, Target, Users } from 'lucide-react'
+import { ArrowLeft, Check, ChevronRight, Crosshair, Gauge, Heart, LockKeyhole, MapPinned, MousePointer2, Shield, ShieldAlert, Sparkles, Target, Users } from 'lucide-react'
 import { lazy, Suspense, useMemo, useState } from 'react'
 import { adventures, buildCards, classificationChallenges } from '../data/content'
 import { getPlayMode, modeSimulations } from '../data/playModes'
@@ -124,12 +124,16 @@ export default function AdventureScreen({ profile, onChange, onImmersive }: Prop
     </section>
   </div>
 
-  return <div className="run-screen screen-enter">
+  const weaponMode = profile.equipped.weapon === 'wrench-blue' ? { name: '定点法阵', detail: '点击场地召唤延迟净化阵', tone: 'sigil' } : profile.equipped.weapon === 'wrench-gold' ? { name: '原型混合武装', detail: '点击交替发射弹体与法阵', tone: 'hybrid' } : { name: '定向净化弹', detail: '点击场地向准星方向发射', tone: 'bolt' }
+  return <div className={`run-screen run-theme-${selected.wasteType} screen-enter`}>
     <header className="run-hud">
       <button onClick={reset} aria-label="退出本局"><ArrowLeft /></button>
       <div className="run-title"><small>{selected.location}</small><b>{selected.name}</b></div>
       <div className="run-progress"><div><span style={{ width: `${metrics.stage / metrics.totalStages * 100}%` }} /></div><small>本局进度 {metrics.stage}/{metrics.totalStages}</small></div>
-      <div className="hud-stat hp"><Heart /> <span>{Math.ceil(metrics.hp)}/{metrics.maxHp}</span></div>
+      <div className="survival-bars">
+        <div className="survival-bar health"><Heart /><span><small>行动生命</small><i><em style={{ width: `${Math.max(0, metrics.hp / metrics.maxHp * 100)}%` }} /></i></span><b>{Math.ceil(metrics.hp)}</b></div>
+        <div className="survival-bar shield"><Shield /><span><small>循环护盾</small><i><em style={{ width: `${Math.max(0, (metrics.shield ?? 0) / Math.max(1, metrics.maxShield ?? 1) * 100)}%` }} /></i></span><b>{Math.ceil(metrics.shield ?? 0)}</b></div>
+      </div>
       <div className="hud-stat pollution"><Gauge /> <span>污染 {metrics.pollution}%</span></div>
       <div className="hud-stat value"><Sparkles /> <span>价值 {metrics.value}</span></div>
     </header>
@@ -137,8 +141,13 @@ export default function AdventureScreen({ profile, onChange, onImmersive }: Prop
     {phase === 'room' && selectedMission && <ExplorationRoom mission={selectedMission} adventure={selected} previewTargets={profile.unlockedSkills.includes('system-scan')} onComplete={() => setPhase('combat')} />}
 
     {(phase === 'combat' || phase === 'boss') && <>
-      <div className="objective-chip"><Target /> {phase === 'boss' ? `击破 ${selected.boss} 的污染外壳` : '稳定区域，净化游离污染体'} <b>连击 {metrics.combo} · 终结 {metrics.finisher}%</b></div>
-      <Suspense fallback={<div className="loading-screen"><span /><b>正在装配精细2D战斗场景…</b></div>}><PhaserCombat adventure={selected} difficulty={difficulty} boss={phase === 'boss'} builds={builds} combatStats={combatStats} screenShake={profile.settings.screenShake} initialPollution={metrics.pollution} initialValue={metrics.value} onHud={(value) => setMetrics((m) => ({ ...m, ...value }))} onComplete={battleDone} onDefeat={() => { setPhase('defeat'); onImmersive(false) }} /></Suspense>
+      <div className="objective-chip"><Target /> <span>{phase === 'boss' ? `击破 ${selected.boss} 的污染外壳` : '稳定区域，净化游离污染体'}</span><b>COMBO {metrics.combo} · 终结 {metrics.finisher}%</b></div>
+      {phase === 'boss' && Boolean(metrics.bossMaxHp) && <div className="boss-hud"><span><ShieldAlert /><small>污染外壳 · 阶段作战</small><b>{selected.boss}</b></span><div><i style={{ width: `${Math.max(0, (metrics.bossHp ?? 0) / Math.max(1, metrics.bossMaxHp ?? 1) * 100)}%` }} /></div><em>{Math.ceil(metrics.bossHp ?? 0)} / {metrics.bossMaxHp}</em></div>}
+      <div className="combat-corner-ui">
+        <div className="combat-minimap" aria-label="战斗雷达"><header><Crosshair /><span>区域雷达</span></header><div>{metrics.radar?.map((enemy, index) => <i key={`${index}-${enemy.x}-${enemy.y}`} className={enemy.boss ? 'boss' : ''} style={{ left: `${enemy.x}%`, top: `${enemy.y}%` }} />)}<b style={{ left: `${metrics.playerX ?? 50}%`, top: `${metrics.playerY ?? 50}%` }} /></div></div>
+        <div className={`active-attack-guide ${weaponMode.tone}`}><MousePointer2 /><span><small>主动武器 · 主要伤害</small><b>{weaponMode.name}</b><em>{weaponMode.detail}</em></span></div>
+      </div>
+      <Suspense fallback={<div className="loading-screen"><span /><b>正在装配精细2D战斗场景…</b></div>}><PhaserCombat adventure={selected} difficulty={difficulty} boss={phase === 'boss'} builds={builds} weaponId={profile.equipped.weapon} combatStats={combatStats} screenShake={profile.settings.screenShake} initialPollution={metrics.pollution} initialValue={metrics.value} onHud={(value) => setMetrics((m) => ({ ...m, ...value }))} onComplete={battleDone} onDefeat={() => { setPhase('defeat'); onImmersive(false) }} /></Suspense>
     </>}
 
     {phase === 'classify' && <section className="decision-overlay">

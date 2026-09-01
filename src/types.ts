@@ -218,6 +218,10 @@ export interface PlayModeDefinition {
 export interface RunMetrics {
   hp: number
   maxHp: number
+  shield?: number
+  maxShield?: number
+  bossHp?: number
+  bossMaxHp?: number
   pollution: number
   value: number
   accuracy: number
@@ -225,4 +229,7 @@ export interface RunMetrics {
   finisher: number
   stage: number
   totalStages: number
+  playerX?: number
+  playerY?: number
+  radar?: { x: number; y: number; boss: boolean }[]
 }

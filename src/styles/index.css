@@ -1,5 +1,6 @@
 @import './screens.css';
 @import './combat.css';
+@import './polish.css';
 
 :root {
   font-family: "Inter", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;

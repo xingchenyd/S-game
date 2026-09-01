@@ -13,6 +13,7 @@ interface Props {
   difficulty: Difficulty
   boss?: boolean
   builds: string[]
+  weaponId: string
   combatStats: CombatStats
   screenShake: boolean
   initialPollution: number
@@ -34,10 +35,14 @@ class ActionScene extends Phaser.Scene {
   private held = { left: false, right: false, up: false, down: false }
   private maxHp = 100
   private hp = 100
+  private maxShield = 0
+  private shield = 0
   private kills = 0
   private targetKills = 12
   private value = 0
   private attackAt = 0
+  private activeAttackAt = 0
+  private hybridSigil = false
   private spawnAt = 0
   private startedAt = 0
   private ended = false
@@ -63,6 +68,7 @@ class ActionScene extends Phaser.Scene {
   constructor(private props: Props) { super('action') }
 
   private get tuning() { return difficultyTuning[this.props.difficulty] }
+  private get weaponMode() { return this.props.weaponId === 'wrench-blue' ? 'sigil' : this.props.weaponId === 'wrench-gold' ? 'hybrid' : 'bolt' }
 
   preload() {
     const type = this.props.adventure.wasteType
@@ -86,6 +92,8 @@ class ActionScene extends Phaser.Scene {
     this.targetKills = this.props.boss ? 1 : this.props.difficulty === 'experience' ? 5 : this.props.difficulty === 'challenge' ? 12 : 8
     this.maxHp = this.props.combatStats.maxHp + (this.props.builds.includes('barrier') ? 15 : 0)
     this.hp = this.maxHp
+    this.maxShield = 12 + Math.round(this.props.combatStats.pollutionGuard * 100) + (this.props.builds.includes('barrier') ? 22 : 0)
+    this.shield = this.maxShield
     const bg = this.add.image(480, 270, 'background').setDisplaySize(960, 540).setTint(0x7fa1a6)
     bg.setAlpha(.68)
     const grid = this.add.grid(480, 270, 960, 540, 48, 48, 0x071b20, .12, 0x58dce4, .08)
@@ -94,7 +102,7 @@ class ActionScene extends Phaser.Scene {
     frame.setFillStyle(0x000000, 0)
 
     this.physics.world.setBounds(22, 22, 916, 496)
-    this.hero = this.physics.add.sprite(480, 330, 'hero-front').setDepth(5).setScale(.78)
+    this.hero = this.physics.add.sprite(480, 330, 'hero-front').setDepth(5).setScale(.58)
     this.hero.setCollideWorldBounds(true).setBodySize(this.hero.width * .38, this.hero.height * .28).setOffset(this.hero.width * .31, this.hero.height * .64)
     this.enemies = this.physics.add.group()
     this.projectiles = this.physics.add.group()
@@ -123,6 +131,10 @@ class ActionScene extends Phaser.Scene {
     this.keys.E.on('up', () => this.releaseCharge())
     this.keys.R.on('down', () => this.finisher())
     this.keys.SPACE.on('down', () => this.dash())
+    this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+      const point = pointer.positionToCamera(this.cameras.main) as Phaser.Math.Vector2
+      this.activeAttack(point.x, point.y)
+    })
     window.addEventListener('sgame-control', this.controlHandler)
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => window.removeEventListener('sgame-control', this.controlHandler))
     if (this.props.boss) this.spawnEnemy(true)
@@ -155,21 +167,45 @@ class ActionScene extends Phaser.Scene {
     const enemy = this.enemies.create(x, y, useRefined ? 'enemy-refined' : `enemy-${variant}`) as Phaser.Physics.Arcade.Sprite
     const hp = Math.round(definition.hp * this.tuning.enemyHp)
     enemy.setDepth(4)
-    if (useRefined) enemy.setDisplaySize(boss ? 194 : definition.tier === 'elite' ? 118 : 86, boss ? 174 : definition.tier === 'elite' ? 106 : 78)
-    else enemy.setScale(boss ? 1.34 : definition.tier === 'elite' ? .82 : .58)
+    if (useRefined) enemy.setDisplaySize(boss ? 138 : definition.tier === 'elite' ? 88 : 66, boss ? 124 : definition.tier === 'elite' ? 78 : 60)
+    else enemy.setScale(boss ? .98 : definition.tier === 'elite' ? .64 : .46)
     enemy.setTint(definition.tier === 'elite' ? 0xffe287 : 0xffffff).setData({ hp, maxHp: hp, boss, definition, shootAt: this.time.now + Phaser.Math.Between(900, 1900), abilityAt: this.time.now + Phaser.Math.Between(1200, 2200), slowedUntil: 0, phase: 0 })
     enemy.setBodySize(enemy.width * .52, enemy.height * .38).setOffset(enemy.width * .24, enemy.height * .56)
+    this.attachEnemyBar(enemy, boss)
     if (useRefined) {
       const baseScaleX = enemy.scaleX; const baseScaleY = enemy.scaleY
       this.tweens.add({ targets: enemy, scaleX: baseScaleX * 1.035, scaleY: baseScaleY * .97, duration: boss ? 920 : 720 + definition.sprite * 45, ease: 'Sine.easeInOut', yoyo: true, repeat: -1 })
     }
     if (boss) {
-      const ring = this.add.circle(x, y, 82).setStrokeStyle(5, 0xff765e, .8).setDepth(3)
+      const ring = this.add.circle(x, y, 58).setStrokeStyle(4, 0xff765e, .8).setDepth(3)
       this.tweens.add({ targets: ring, scale: 1.15, alpha: .35, duration: 900, yoyo: true, repeat: -1 })
       enemy.setData('ring', ring)
       const title = this.add.text(480, 82, definition.name, { fontFamily: 'monospace', fontSize: '20px', color: '#fff3e5', backgroundColor: '#4b1820', padding: { x: 14, y: 7 } }).setOrigin(.5).setDepth(12)
       this.time.delayedCall(1500, () => this.tweens.add({ targets: title, alpha: 0, duration: 300, onComplete: () => title.destroy() }))
     }
+  }
+
+  private attachEnemyBar(enemy: Phaser.Physics.Arcade.Sprite, boss: boolean) {
+    const width = boss ? 104 : enemy.getData('definition').tier === 'elite' ? 66 : 48
+    const background = this.add.rectangle(enemy.x, enemy.y, width, boss ? 9 : 6, 0x071116, .94).setStrokeStyle(2, boss ? 0xffd65a : 0xd9f2ef, .72).setDepth(9)
+    const fill = this.add.rectangle(enemy.x - width / 2 + 2, enemy.y, width - 4, boss ? 5 : 3, boss ? 0xff765e : 0x74ed9d, 1).setOrigin(0, .5).setDepth(10)
+    enemy.setData('barWidth', width).setData('barBg', background).setData('barFill', fill)
+  }
+
+  private updateEnemyBar(enemy: Phaser.Physics.Arcade.Sprite) {
+    const background = enemy.getData('barBg') as Phaser.GameObjects.Rectangle | undefined
+    const fill = enemy.getData('barFill') as Phaser.GameObjects.Rectangle | undefined
+    if (!background || !fill) return
+    const width = enemy.getData('barWidth') as number
+    const y = enemy.y - enemy.displayHeight * .55 - 8
+    const ratio = Phaser.Math.Clamp((enemy.getData('hp') as number) / (enemy.getData('maxHp') as number), 0, 1)
+    background.setPosition(enemy.x, y)
+    fill.setPosition(enemy.x - width / 2 + 2, y).setDisplaySize((width - 4) * ratio, fill.height)
+  }
+
+  private destroyEnemyBar(enemy: Phaser.Physics.Arcade.Sprite) {
+    ;(enemy.getData('barBg') as Phaser.GameObjects.Rectangle | undefined)?.destroy()
+    ;(enemy.getData('barFill') as Phaser.GameObjects.Rectangle | undefined)?.destroy()
   }
 
   private attack(now: number) {
@@ -178,23 +214,72 @@ class ActionScene extends Phaser.Scene {
     if (!living.length) return
     const nearest = living.sort((a, b) => Phaser.Math.Distance.Between(this.hero.x, this.hero.y, a.x, a.y) - Phaser.Math.Distance.Between(this.hero.x, this.hero.y, b.x, b.y))[0]
     const projectile = this.projectiles.create(this.hero.x, this.hero.y - 8, 'spark') as Phaser.Physics.Arcade.Image
-    const crit = Math.random() < this.props.combatStats.critChance
+    const crit = Math.random() < this.props.combatStats.critChance * .6
     const baseDamage = this.props.combatStats.attack + (this.props.builds.includes('cascade') ? 4 : 0)
-    projectile.setScale(crit ? .28 : .22).setDepth(6).setTint(crit ? 0xffd65a : 0x63efff).setData('damage', Math.round(baseDamage * (crit ? 1.6 : 1))).setData('target', nearest)
-    this.physics.moveToObject(projectile, nearest, 560)
-    this.time.delayedCall(1100, () => projectile.active && projectile.destroy())
-    this.attackAt = now + (this.props.builds.includes('pulse') ? 330 : 410) / this.props.combatStats.attackSpeed
-    const flash = this.add.circle(this.hero.x, this.hero.y - 8, 8, 0xb9fbff, .9).setDepth(6)
-    this.tweens.add({ targets: flash, scale: 2.8, alpha: 0, duration: 130, onComplete: () => flash.destroy() })
+    projectile.setScale(crit ? .22 : .17).setDepth(6).setTint(crit ? 0xffd65a : 0x72dbe7).setAlpha(.82).setData('damage', Math.round(baseDamage * .46 * (crit ? 1.5 : 1))).setData('target', nearest).setData('homing', true)
+    this.physics.moveToObject(projectile, nearest, 440)
+    this.time.delayedCall(1400, () => projectile.active && projectile.destroy())
+    this.attackAt = now + (this.props.builds.includes('pulse') ? 880 : 1120) / this.props.combatStats.attackSpeed
+    const flash = this.add.circle(this.hero.x, this.hero.y - 8, 6, 0x9feef2, .55).setDepth(6)
+    this.tweens.add({ targets: flash, scale: 2.1, alpha: 0, duration: 150, onComplete: () => flash.destroy() })
+  }
+
+  private activeAttack(x: number, y: number) {
+    if (this.ended || this.time.now < this.activeAttackAt) return
+    const useSigil = this.weaponMode === 'sigil' || (this.weaponMode === 'hybrid' && (this.hybridSigil = !this.hybridSigil))
+    if (useSigil) this.castSigil(x, y)
+    else this.fireManualBolt(x, y)
+  }
+
+  private fireManualBolt(x: number, y: number) {
+    this.activeAttackAt = this.time.now + 270 / this.props.combatStats.attackSpeed
+    const direction = new Phaser.Math.Vector2(x - this.hero.x, y - this.hero.y).normalize()
+    if (!direction.lengthSq()) return
+    this.lastDirection.copy(direction)
+    const crit = Math.random() < this.props.combatStats.critChance
+    const damage = Math.round(this.props.combatStats.attack * (crit ? 2.05 : 1.35))
+    const projectile = this.projectiles.create(this.hero.x + direction.x * 18, this.hero.y - 7 + direction.y * 18, 'spark') as Phaser.Physics.Arcade.Image
+    projectile.setScale(crit ? .34 : .27).setDepth(7).setTint(crit ? 0xffdf62 : this.props.weaponId === 'wrench-green' ? 0x78f0a4 : 0x65e8ff).setData('damage', damage).setData('homing', false).setVelocity(direction.x * 720, direction.y * 720)
+    this.time.delayedCall(900, () => projectile.active && projectile.destroy())
+    const muzzle = this.add.star(this.hero.x + direction.x * 17, this.hero.y - 7 + direction.y * 17, 6, 4, 11, crit ? 0xffd65a : 0xb9fbff, .92).setDepth(8).setRotation(direction.angle())
+    this.tweens.add({ targets: muzzle, scale: 2.4, alpha: 0, duration: 130, onComplete: () => muzzle.destroy() })
+    playUiSound(crit ? 'success' : 'click', .35)
+  }
+
+  private castSigil(x: number, y: number) {
+    this.activeAttackAt = this.time.now + (this.weaponMode === 'hybrid' ? 620 : 760) / this.props.combatStats.cooldownRate
+    const targetX = Phaser.Math.Clamp(x, 55, 905)
+    const targetY = Phaser.Math.Clamp(y, 55, 485)
+    const radius = this.weaponMode === 'hybrid' ? 82 : 96
+    const outer = this.add.circle(targetX, targetY, radius, 0x865dff, .1).setStrokeStyle(4, 0xc7b7ff, .9).setDepth(7)
+    const inner = this.add.circle(targetX, targetY, radius * .52, 0xff78ad, .08).setStrokeStyle(3, 0x70f0ff, .85).setDepth(7)
+    this.tweens.add({ targets: [outer, inner], angle: 150, scale: .72, duration: 340, ease: 'Sine.easeIn' })
+    this.time.delayedCall(340, () => {
+      if (!outer.active) return
+      this.cameras.main.shake(this.profileShake ? 70 : 0, .004)
+      this.enemies.getChildren().forEach((item) => {
+        const enemy = item as Phaser.Physics.Arcade.Sprite
+        if (enemy.active && Phaser.Math.Distance.Between(targetX, targetY, enemy.x, enemy.y) <= radius) this.damageEnemy(enemy, Math.round(this.props.combatStats.attack * 1.75), true)
+      })
+      const bloom = this.add.circle(targetX, targetY, 22, 0xc9baff, .72).setDepth(8)
+      this.tweens.add({ targets: bloom, scale: 5.5, alpha: 0, duration: 330, onComplete: () => bloom.destroy() })
+      outer.destroy(); inner.destroy(); playUiSound('success', .5)
+    })
   }
 
   private hitEnemy(projectile: Phaser.Physics.Arcade.Image, enemy: Phaser.Physics.Arcade.Sprite) {
     const damage = projectile.getData('damage') as number
+    const active = !projectile.getData('homing')
     projectile.destroy()
-    playUiSound('click', .22)
+    this.damageEnemy(enemy, damage, active)
+  }
+
+  private damageEnemy(enemy: Phaser.Physics.Arcade.Sprite, damage: number, active = false) {
+    if (!enemy.active) return
+    playUiSound(active ? 'success' : 'click', active ? .34 : .18)
     const hp = (enemy.getData('hp') as number) - damage
     enemy.setData('hp', hp).setTint(0xffffff)
-    this.hitCombo = this.time.now < this.comboExpiresAt ? this.hitCombo + 1 : 1
+    this.hitCombo = this.time.now < this.comboExpiresAt ? this.hitCombo + (active ? 2 : 1) : (active ? 2 : 1)
     this.comboExpiresAt = this.time.now + 1600
     this.finisherCharge = Math.min(100, this.finisherCharge + (enemy.getData('boss') ? 5 : 8))
     this.time.delayedCall(55, () => enemy.active && enemy.clearTint())
@@ -203,6 +288,8 @@ class ActionScene extends Phaser.Scene {
       const bit = this.add.rectangle(enemy.x, enemy.y, 4, 4, this.props.adventure.wasteType === 'textile' ? 0xff78ad : 0x41e7ff).setDepth(7)
       this.tweens.add({ targets: bit, x: enemy.x + Phaser.Math.Between(-28, 28), y: enemy.y + Phaser.Math.Between(-28, 28), alpha: 0, duration: 220, onComplete: () => bit.destroy() })
     }
+    const number = this.add.text(enemy.x, enemy.y - enemy.displayHeight * .52, `${active ? '✦ ' : ''}${damage}`, { fontFamily: 'monospace', fontSize: active ? '15px' : '11px', color: active ? '#fff1a8' : '#d7fbff', stroke: '#071116', strokeThickness: 4 }).setOrigin(.5).setDepth(12)
+    this.tweens.add({ targets: number, y: number.y - 24, alpha: 0, duration: active ? 520 : 380, onComplete: () => number.destroy() })
     if (this.props.builds.includes('pulse') && Math.random() < .18) enemy.setData('slowedUntil', this.time.now + 700)
     this.checkBossPhase(enemy, hp)
     if (hp <= 0) this.purify(enemy)
@@ -231,6 +318,7 @@ class ActionScene extends Phaser.Scene {
     const shouldSplit = !isBoss && definition.role === 'splitter' && !enemy.getData('splitChild')
     const ring = enemy.getData('ring') as Phaser.GameObjects.Arc | undefined
     ring?.destroy()
+    this.destroyEnemyBar(enemy)
     const burst = this.add.circle(enemy.x, enemy.y, isBoss ? 24 : 12, 0x70f0a8, .75).setDepth(8)
     this.tweens.add({ targets: burst, scale: isBoss ? 8 : 4, alpha: 0, duration: 440, onComplete: () => burst.destroy() })
     enemy.destroy()
@@ -239,6 +327,7 @@ class ActionScene extends Phaser.Scene {
         const fragment = this.enemies.create(splitOrigin.x + offset, splitOrigin.y, splitOrigin.texture) as Phaser.Physics.Arcade.Sprite
         fragment.setDepth(4).setScale(.34).setTint(definition.color).setData({ hp: 12, maxHp: 12, boss: false, definition, splitChild: true, shootAt: this.time.now + 1800, abilityAt: this.time.now + 3200, slowedUntil: 0, phase: 0 })
         fragment.setBodySize(fragment.width * .5, fragment.height * .36).setOffset(fragment.width * .25, fragment.height * .58)
+        this.attachEnemyBar(fragment, false)
       }
     }
     playUiSound(isBoss ? 'success' : 'hover', isBoss ? .8 : .28)
@@ -256,8 +345,11 @@ class ActionScene extends Phaser.Scene {
     if (this.time.now < this.invulnerableUntil || this.ended) return
     this.invulnerableUntil = this.time.now + 550
     const protectedDamage = damage * (1 - this.props.combatStats.pollutionGuard)
-    this.hp -= protectedDamage
-    this.damageTaken += protectedDamage
+    const absorbed = Math.min(this.shield, protectedDamage)
+    this.shield -= absorbed
+    const healthDamage = protectedDamage - absorbed
+    this.hp -= healthDamage
+    this.damageTaken += healthDamage
     playUiSound('danger', .35)
     const angle = Phaser.Math.Angle.Between(sourceX, sourceY, this.hero.x, this.hero.y)
     this.hero.setVelocity(Math.cos(angle) * 360, Math.sin(angle) * 360).setTint(0xff766e)
@@ -293,10 +385,7 @@ class ActionScene extends Phaser.Scene {
       const distance = Phaser.Math.Distance.Between(this.hero.x, this.hero.y, enemy.x, enemy.y)
       const toEnemy = new Phaser.Math.Vector2(enemy.x - this.hero.x, enemy.y - this.hero.y).normalize()
       if (distance <= reach && this.lastDirection.dot(toEnemy) > .55) {
-        enemy.setData('hp', (enemy.getData('hp') as number) - damage)
-        this.hitCombo += 2; this.comboExpiresAt = this.time.now + 1800; this.finisherCharge = Math.min(100, this.finisherCharge + 16)
-        this.checkBossPhase(enemy, enemy.getData('hp'))
-        if ((enemy.getData('hp') as number) <= 0) this.purify(enemy)
+        this.damageEnemy(enemy, damage, true)
       }
     })
   }
@@ -312,9 +401,7 @@ class ActionScene extends Phaser.Scene {
       const enemy = item as Phaser.Physics.Arcade.Sprite
       if (!enemy.active) return
       const damage = enemy.getData('boss') ? 125 : 999
-      enemy.setData('hp', (enemy.getData('hp') as number) - damage)
-      this.checkBossPhase(enemy, enemy.getData('hp'))
-      if ((enemy.getData('hp') as number) <= 0) this.purify(enemy)
+      this.damageEnemy(enemy, damage, true)
     })
   }
 
@@ -328,9 +415,8 @@ class ActionScene extends Phaser.Scene {
       const enemy = item as Phaser.Physics.Arcade.Sprite
       const toEnemy = new Phaser.Math.Vector2(enemy.x - this.hero.x, enemy.y - this.hero.y).normalize()
       if (Phaser.Math.Distance.Between(this.hero.x, this.hero.y, enemy.x, enemy.y) < 220 && this.lastDirection.dot(toEnemy) > .15) {
-        enemy.setData('hp', (enemy.getData('hp') as number) - 24)
         enemy.setData('slowedUntil', this.time.now + 900)
-        if ((enemy.getData('hp') as number) <= 0) this.purify(enemy)
+        this.damageEnemy(enemy, 24, true)
       }
     })
   }
@@ -341,7 +427,7 @@ class ActionScene extends Phaser.Scene {
     playUiSound('hover', .25)
     this.dashUntil = this.time.now + 190
     this.invulnerableUntil = this.time.now + (this.props.builds.includes('barrier') ? 650 : 260)
-    const ghost = this.add.image(this.hero.x, this.hero.y, this.hero.texture.key).setScale(.78).setAlpha(.55).setTint(0x41e7ff).setDepth(3)
+    const ghost = this.add.image(this.hero.x, this.hero.y, this.hero.texture.key).setScale(.58).setAlpha(.55).setTint(0x41e7ff).setDepth(3)
     this.tweens.add({ targets: ghost, alpha: 0, duration: 220, onComplete: () => ghost.destroy() })
   }
 
@@ -384,6 +470,7 @@ class ActionScene extends Phaser.Scene {
       else enemy.setVelocity(0)
       const ring = enemy.getData('ring') as Phaser.GameObjects.Arc | undefined
       ring?.setPosition(enemy.x, enemy.y)
+      this.updateEnemyBar(enemy)
       if ((definition.role === 'ranged' || isBoss) && now > (enemy.getData('shootAt') as number)) {
         const shot = this.enemyProjectiles.create(enemy.x, enemy.y, 'spark') as Phaser.Physics.Arcade.Image
         shot.setScale(.16).setTint(0xff6f68).setDepth(6)
@@ -417,7 +504,12 @@ class ActionScene extends Phaser.Scene {
     if (now >= this.hudAt) {
       this.hudAt = now + 100
       if (now > this.comboExpiresAt) this.hitCombo = 0
-      this.props.onHud({ hp: Math.max(0, this.hp), maxHp: this.maxHp, pollution: Math.round(this.pollution), value: this.value, combo: this.hitCombo, finisher: Math.round(this.finisherCharge) })
+      const radar = this.enemies.getChildren().filter((item) => (item as Phaser.Physics.Arcade.Sprite).active).map((item) => {
+        const enemy = item as Phaser.Physics.Arcade.Sprite
+        return { x: enemy.x / 9.6, y: enemy.y / 5.4, boss: Boolean(enemy.getData('boss')) }
+      })
+      const boss = this.enemies.getChildren().find((item) => (item as Phaser.Physics.Arcade.Sprite).active && Boolean((item as Phaser.Physics.Arcade.Sprite).getData('boss'))) as Phaser.Physics.Arcade.Sprite | undefined
+      this.props.onHud({ hp: Math.max(0, this.hp), maxHp: this.maxHp, shield: Math.max(0, this.shield), maxShield: this.maxShield, bossHp: boss ? Math.max(0, boss.getData('hp')) : 0, bossMaxHp: boss?.getData('maxHp') ?? 0, pollution: Math.round(this.pollution), value: this.value, combo: this.hitCombo, finisher: Math.round(this.finisherCharge), playerX: this.hero.x / 9.6, playerY: this.hero.y / 5.4, radar })
     }
     if (now >= this.pollutionAt) {
       this.pollutionAt = now + 1000
@@ -435,6 +527,7 @@ export default function PhaserCombat(props: Props) {
   const host = useRef<HTMLDivElement>(null)
   const propsRef = useRef(props)
   propsRef.current = props
+  const buildKey = props.builds.join('|')
 
   useEffect(() => {
     if (!host.current) return
@@ -453,12 +546,12 @@ export default function PhaserCombat(props: Props) {
       render: { antialias: true, roundPixels: false },
     })
     return () => game.destroy(true)
-  }, [props.adventure.id, props.boss, props.difficulty, props.combatStats.attack, props.combatStats.maxHp])
+  }, [props.adventure.id, props.boss, props.difficulty, props.weaponId, buildKey, props.screenShake, props.combatStats.attack, props.combatStats.attackSpeed, props.combatStats.cooldownRate, props.combatStats.critChance, props.combatStats.maxHp, props.combatStats.moveSpeed, props.combatStats.pollutionGuard])
 
   const control = (action: string, active = true) => window.dispatchEvent(new CustomEvent('sgame-control', { detail: { action, active } }))
   const holdProps = (action: string) => ({
     onPointerDown: (event: React.PointerEvent) => { event.currentTarget.setPointerCapture(event.pointerId); control(action, true) },
-    onPointerUp: () => control(action, false), onPointerCancel: () => control(action, false), onPointerLeave: () => control(action, false),
+    onPointerUp: () => control(action, false), onPointerCancel: () => control(action, false),
   })
 
   return <div className="combat-stage">
