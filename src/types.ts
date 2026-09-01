@@ -232,4 +232,7 @@ export interface RunMetrics {
   playerX?: number
   playerY?: number
   radar?: { x: number; y: number; boss: boolean }[]
+  drops?: number
+  activeBuffs?: { id: string; label: string; remaining: number; tone: string }[]
+  skillCooldowns?: { pulse: number; dash: number; finisher: number }
 }

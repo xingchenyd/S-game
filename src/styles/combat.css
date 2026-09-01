@@ -39,6 +39,7 @@
 .active-attack-guide { display:flex;gap:8px;align-items:center;padding:9px;border:3px solid #05090b;color:white;background:#12303ae8;box-shadow:5px 5px 0 #000; }.active-attack-guide > svg { width:26px;color:var(--run-accent);animation:aim-pulse 1.4s ease-in-out infinite; }.active-attack-guide span { display:grid; }.active-attack-guide small { color:#a8c8ce;font:800 7px ui-monospace,monospace; }.active-attack-guide b { color:var(--run-accent);font-size:11px; }.active-attack-guide em { color:#d8e9ec;font-size:8px;font-style:normal; }.active-attack-guide.sigil { background:#29204ce8; }.active-attack-guide.hybrid { background:#4b2c1ce8; }
 @keyframes aim-pulse { 50% { transform:scale(1.18) rotate(-7deg);filter:drop-shadow(0 0 6px var(--run-accent)); } }
 .touch-controls button { transition:transform .1s,filter .1s,background-color .1s; }.touch-controls button:active { transform:translate(2px,2px) scale(.94);filter:brightness(1.35);box-shadow:1px 1px 0 #000; }
+.touch-controls button.is-ready { border-color:#fff1a6;box-shadow:0 0 0 3px #ffd65a3d,4px 4px 0 #0009;filter:saturate(1.18); }
 .room-player { transition:none;width:60px;height:72px; }.room-player.face-left img { transform:scaleX(-1); }.room-player.is-moving img { animation:room-walk .22s steps(2) infinite; }.room-dpad button:active { color:#071116;background:var(--accent);transform:translate(2px,2px);box-shadow:none; }
 @keyframes room-walk { 50% { translate:0 -3px; } }
 
@@ -54,4 +55,22 @@
   .phaser-host canvas { height:100% !important;object-position:center center; }
   .touch-controls { top:clamp(210px,56.25vw,260px);bottom:auto;height:154px;border-top:4px solid #183d47;background:linear-gradient(180deg,#0b252c,#06151c); }
   .dpad { bottom:8px; }.action-pad { bottom:10px; }
+}
+
+/* Combat v3: active skill rack, field buffs and visible loot state. */
+.active-attack-guide.chain { background:#153e2be8; }
+.combat-skill-tray { position:absolute;z-index:24;left:50%;bottom:16px;translate:-50% 0;display:grid;grid-template-columns:repeat(4,minmax(112px,1fr));gap:6px;width:min(580px,calc(100% - 430px));pointer-events:none; }
+.combat-skill-tray > div { position:relative;min-height:48px;display:grid;grid-template-columns:32px 1fr;align-items:center;gap:5px;padding:5px 7px;border:2px solid #172e35;background:#07151be8;color:#78939a;box-shadow:3px 3px 0 #000;overflow:hidden; }
+.combat-skill-tray > div.ready { color:white;border-color:var(--run-accent);background:#0c2830ee;box-shadow:3px 3px 0 #000,0 0 15px color-mix(in srgb,var(--run-accent) 20%,transparent); }
+.combat-skill-tray > div.ultimate.ready { border-color:#ffd65a;background:#44351bee; }
+.combat-skill-tray kbd { width:28px;height:28px;display:grid;place-items:center;border:2px solid currentColor;background:#061116;font:900 11px ui-monospace,monospace; }
+.combat-skill-tray span { display:grid;line-height:1.15; }.combat-skill-tray b { font-size:9px; }.combat-skill-tray small { color:#95aeb4;font:700 7px ui-monospace,monospace; }
+.combat-skill-tray i { position:absolute;left:0;right:0;bottom:0;height:3px;background:#162a30; }.combat-skill-tray i em { display:block;height:100%;background:var(--run-accent);box-shadow:0 0 8px var(--run-accent);transition:width .1s linear; }
+.combat-skill-tray .ultimate i em { background:#ffd65a;box-shadow:0 0 8px #ffd65a; }
+.combat-buff-stack { position:absolute;z-index:24;left:18px;bottom:80px;display:grid;gap:5px;pointer-events:none; }
+.combat-buff-stack > div { min-width:116px;display:flex;justify-content:space-between;gap:12px;padding:6px 8px;border:2px solid #061116;background:#132c32e8;box-shadow:3px 3px 0 #000;font:800 8px ui-monospace,monospace; }
+.combat-buff-stack .attack { color:#ffc56b;border-color:#ff9f4c; }.combat-buff-stack .speed { color:#8df2b4;border-color:#59d98c; }.combat-buff-stack .drops { color:#fff0a4;border-color:#ffd65a; }
+
+@media (max-width:900px) {
+  .combat-skill-tray { display:none; }.combat-buff-stack { left:8px;bottom:auto;top:170px; }.combat-buff-stack > div { min-width:98px;padding:4px 6px; }
 }

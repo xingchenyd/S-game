@@ -124,7 +124,7 @@ export default function AdventureScreen({ profile, onChange, onImmersive }: Prop
     </section>
   </div>
 
-  const weaponMode = profile.equipped.weapon === 'wrench-blue' ? { name: '定点法阵', detail: '点击场地召唤延迟净化阵', tone: 'sigil' } : profile.equipped.weapon === 'wrench-gold' ? { name: '原型混合武装', detail: '点击交替发射弹体与法阵', tone: 'hybrid' } : { name: '定向净化弹', detail: '点击场地向准星方向发射', tone: 'bolt' }
+  const weaponMode = profile.equipped.weapon === 'wrench-blue' ? { name: '定点法阵', detail: '点击场地召唤延迟范围净化阵', tone: 'sigil' } : profile.equipped.weapon === 'wrench-gold' ? { name: '原型混合武装', detail: '点击交替发射弹体与范围法阵', tone: 'hybrid' } : profile.equipped.weapon === 'wrench-green' ? { name: '链式净化弹', detail: '命中后跳转至附近第二个目标', tone: 'chain' } : { name: '定向净化弹', detail: '每第四次点击发射三向散射弹', tone: 'bolt' }
   return <div className={`run-screen run-theme-${selected.wasteType} screen-enter`}>
     <header className="run-hud">
       <button onClick={reset} aria-label="退出本局"><ArrowLeft /></button>
@@ -147,7 +147,14 @@ export default function AdventureScreen({ profile, onChange, onImmersive }: Prop
         <div className="combat-minimap" aria-label="战斗雷达"><header><Crosshair /><span>区域雷达</span></header><div>{metrics.radar?.map((enemy, index) => <i key={`${index}-${enemy.x}-${enemy.y}`} className={enemy.boss ? 'boss' : ''} style={{ left: `${enemy.x}%`, top: `${enemy.y}%` }} />)}<b style={{ left: `${metrics.playerX ?? 50}%`, top: `${metrics.playerY ?? 50}%` }} /></div></div>
         <div className={`active-attack-guide ${weaponMode.tone}`}><MousePointer2 /><span><small>主动武器 · 主要伤害</small><b>{weaponMode.name}</b><em>{weaponMode.detail}</em></span></div>
       </div>
-      <Suspense fallback={<div className="loading-screen"><span /><b>正在装配精细2D战斗场景…</b></div>}><PhaserCombat adventure={selected} difficulty={difficulty} boss={phase === 'boss'} builds={builds} weaponId={profile.equipped.weapon} combatStats={combatStats} screenShake={profile.settings.screenShake} initialPollution={metrics.pollution} initialValue={metrics.value} onHud={(value) => setMetrics((m) => ({ ...m, ...value }))} onComplete={battleDone} onDefeat={() => { setPhase('defeat'); onImmersive(false) }} /></Suspense>
+      <div className="combat-buff-stack">{metrics.activeBuffs?.map((buff) => <div key={buff.id} className={buff.tone}><b>{buff.label}</b><span>{buff.remaining}s</span></div>)}{Boolean(metrics.drops) && <div className="drops"><b>场内掉落物</b><span>{metrics.drops}</span></div>}</div>
+      <div className="combat-skill-tray" aria-label="主动技能状态">
+        <div className={(metrics.skillCooldowns?.pulse ?? 0) <= 0 ? 'ready' : ''}><kbd>Q</kbd><span><b>定向脉冲</b><small>{(metrics.skillCooldowns?.pulse ?? 0) <= 0 ? '可释放' : `${metrics.skillCooldowns?.pulse?.toFixed(1)}s`}</small></span><i><em style={{ width: `${Math.max(0, 100 - (metrics.skillCooldowns?.pulse ?? 0) / 6.5 * 100)}%` }} /></i></div>
+        <div className="ready"><kbd>E</kbd><span><b>蓄力工具</b><small>按住后释放</small></span><i><em style={{ width: '100%' }} /></i></div>
+        <div className={(metrics.skillCooldowns?.dash ?? 0) <= 0 ? 'ready' : ''}><kbd>␣</kbd><span><b>无敌冲刺</b><small>{(metrics.skillCooldowns?.dash ?? 0) <= 0 ? '可释放' : `${metrics.skillCooldowns?.dash?.toFixed(1)}s`}</small></span><i><em style={{ width: `${Math.max(0, 100 - (metrics.skillCooldowns?.dash ?? 0) / 1.8 * 100)}%` }} /></i></div>
+        <div className={metrics.finisher >= 100 ? 'ready ultimate' : 'ultimate'}><kbd>R</kbd><span><b>原型终结</b><small>{metrics.finisher}%</small></span><i><em style={{ width: `${metrics.finisher}%` }} /></i></div>
+      </div>
+      <Suspense fallback={<div className="loading-screen"><span /><b>正在装配精细2D战斗场景…</b></div>}><PhaserCombat adventure={selected} difficulty={difficulty} boss={phase === 'boss'} builds={builds} weaponId={profile.equipped.weapon} combatStats={combatStats} screenShake={profile.settings.screenShake} initialPollution={metrics.pollution} initialValue={metrics.value} finisherCharge={metrics.finisher} pulseCooldown={metrics.skillCooldowns?.pulse} dashCooldown={metrics.skillCooldowns?.dash} onHud={(value) => setMetrics((m) => ({ ...m, ...value }))} onComplete={battleDone} onDefeat={() => { setPhase('defeat'); onImmersive(false) }} /></Suspense>
     </>}
 
     {phase === 'classify' && <section className="decision-overlay">
