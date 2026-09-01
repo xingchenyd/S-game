@@ -1,7 +1,7 @@
 import { ArrowLeft, BookOpenCheck, Check, ChevronRight, RotateCcw, ShieldCheck, Sparkles } from 'lucide-react'
 import { useMemo, useState } from 'react'
-import { getPlayMode, modeSimulations, playModes } from '../data/playModes'
-import type { PlayerProfile, PlayModeDefinition, PlayModeId } from '../types'
+import { modeSimulations, playModes } from '../data/playModes'
+import type { PlayerProfile, PlayModeDefinition } from '../types'
 
 interface Props { profile: PlayerProfile; onChange: (profile: PlayerProfile) => void }
 
@@ -82,5 +82,3 @@ function ModeRun({ mode, profile, onChange, onExit }: { mode: PlayModeDefinition
     </section> : <section className="mode-result pixel-panel"><div className="result-grade">{score >= 80 ? 'S' : score >= 65 ? 'A' : score >= 50 ? 'B' : 'C'}</div><span className="eyebrow">SYSTEM MASTERY</span><h1>{mode.shortName} · {score}分</h1><p>本次有 {correctChoices}/{simulation.rounds.length} 个阶段选择了兼顾安全、材料价值与系统后果的方案。仪表数值用于表达玩法资源，不再直接换算为成绩。</p><p>{mode.mastery}</p><div className="principle-log">{principles.map((principle, index) => <div key={`${principle}-${index}`}><Check /> <span>阶段 {index + 1}</span><b>{principle}</b></div>)}</div><div className="result-actions"><button className="secondary-button" onClick={restart}><RotateCcw /> 再次训练</button><button className="primary-button" onClick={onExit}>返回系统列表</button></div></section>}
   </div>
 }
-
-export const getModeLabel = (id: PlayModeId) => getPlayMode(id)?.shortName ?? id
