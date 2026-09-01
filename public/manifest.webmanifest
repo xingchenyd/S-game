@@ -1,0 +1,14 @@
+{
+  "name": "S-game · 废料环线",
+  "short_name": "S-game",
+  "description": "在上海的城市废弃物流转中，战胜污染外壳，找回材料价值。",
+  "lang": "zh-CN",
+  "start_url": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#06151c",
+  "theme_color": "#081c24",
+  "icons": [
+    { "src": "pixel-icons/home.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
