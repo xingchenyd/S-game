@@ -15,6 +15,7 @@ interface Props {
 const nav: { screen: Screen; label: string; icon: string }[] = [
   { screen: 'hub', label: '基地', icon: 'home' },
   { screen: 'adventure', label: '行动', icon: 'map' },
+  { screen: 'training', label: '训练', icon: 'shield-check' },
   { screen: 'museum', label: '展馆', icon: 'archive-box' },
   { screen: 'theater', label: '剧场', icon: 'book' },
   { screen: 'profile', label: '档案', icon: 'user-avatar' },

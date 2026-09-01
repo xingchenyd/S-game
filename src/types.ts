@@ -1,4 +1,4 @@
-export type Screen = 'start' | 'hub' | 'adventure' | 'museum' | 'theater' | 'profile' | 'equipment' | 'exchange'
+export type Screen = 'start' | 'hub' | 'adventure' | 'museum' | 'theater' | 'profile' | 'equipment' | 'exchange' | 'training'
 export type WasteType = 'electronic' | 'plastic' | 'paper' | 'textile'
 export type Difficulty = 'experience' | 'standard' | 'challenge'
 
@@ -6,6 +6,8 @@ export interface Settings {
   masterVolume: number
   musicVolume: number
   effectsVolume: number
+  voiceVolume: number
+  voicePreview: boolean
   screenShake: boolean
   reducedMotion: boolean
   highContrast: boolean
@@ -42,6 +44,7 @@ export interface PlayerProfile {
   prototypes: string[]
   collectibles: string[]
   storiesCompleted: string[]
+  modeMastery: Partial<Record<PlayModeId, number>>
   equipmentOwned: string[]
   equipped: EquippedItems
   settings: Settings
@@ -62,6 +65,9 @@ export interface AdventureDefinition {
   boss: string
   prototype: string
   available: boolean
+  chapter?: string
+  modes?: PlayModeId[]
+  routeNodes?: { id: string; name: string; kind: 'story' | 'combat' | 'skill' | 'rest' | 'boss'; description: string }[]
 }
 
 export interface EquipmentItem {
@@ -110,6 +116,39 @@ export interface StoryDefinition {
   type: WasteType
   cover: string
   beats: StoryBeat[]
+  tags: string[]
+  learningGoals: string[]
+  sourceIds: string[]
+  reviewStatus: '资料初审' | '待专家复核' | '已复核'
+  estimatedCharacters: number
+}
+
+export interface KnowledgeSource {
+  id: string
+  title: string
+  publisher: string
+  url: string
+  scope: string
+  checkedAt: string
+}
+
+export type PlayModeId = 'branch-expedition' | 'pollution-control' | 'sorting-line' | 'repair-bench' | 'material-escort' | 'hazard-isolation' | 'facility-defense' | 'eco-mechanism' | 'npc-commission' | 'passport-hunt' | 'finale-operation'
+
+export interface PlayModeDefinition {
+  id: PlayModeId
+  name: string
+  shortName: string
+  icon: string
+  fantasy: string
+  playerLoop: string[]
+  controls: string
+  winCondition: string
+  failCondition: string
+  education: string[]
+  variants: { name: string; change: string }[]
+  rewards: string[]
+  mastery: string
+  available: boolean
 }
 
 export interface RunMetrics {
@@ -119,6 +158,7 @@ export interface RunMetrics {
   value: number
   accuracy: number
   combo: number
+  finisher: number
   stage: number
   totalStages: number
 }

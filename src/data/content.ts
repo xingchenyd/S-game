@@ -1,8 +1,8 @@
-import type { AdventureDefinition, Collectible, EquipmentItem, StoryDefinition } from '../types'
+import type { AdventureDefinition, Collectible, EquipmentItem } from '../types'
 
 const legacy = '/art/legacy'
 
-export const adventures: AdventureDefinition[] = [
+const baseAdventures: AdventureDefinition[] = [
   {
     id: 'lujiazui-circuit', name: '陆家嘴·失控电流', subtitle: '上海首发行动', location: '浦东新区 · 陆家嘴环线', wasteType: 'electronic', icon: '⚡', accent: '#41e7ff',
     background: `${legacy}/generated/bg_electronic.png`, available: true,
@@ -40,6 +40,34 @@ export const adventures: AdventureDefinition[] = [
   },
 ]
 
+const extraAdventures: AdventureDefinition[] = [
+  { id: 'hongqiao-event', name: '虹桥·撤展倒计时', subtitle: '公益展会复合行动', location: '闵行区 · 虹桥会展带', wasteType: 'plastic', icon: '▦', accent: '#ff9b5e', background: '/art/scenes/event-hall.png', available: true, briefing: '闭馆前一小时，餐区包装、喷绘物料和电子体验设备同时回流。先稳住人流与危险物，再让可复用展具进入下一场活动。', lesson: ['公益活动自身也要为物料负责', '纸塑复合包装以现场专项标识为准', '展具应在设计与合同阶段预设去向'], boss: '一次性巨幕兽', prototype: '虹桥·周转展具原型' },
+  { id: 'lingang-logistics', name: '临港·逆向物流线', subtitle: '材料护送行动', location: '浦东新区 · 临港物流中心', wasteType: 'plastic', icon: '⇢', accent: '#68d6ff', background: '/art/scenes/logistics-terminal.png', available: true, briefing: '清洁缠绕膜与周转箱等待返程车，混装、雨水和错误交接正在让价值快速下降。你需要护送材料，而不是只清空仓库。', lesson: ['单一清洁材料更容易稳定再生', '逆向物流要与真实返程容量衔接', '交接记录让去向可以核验'], boss: '混装吞运体', prototype: '临港·透明物流原型' },
+  { id: 'chongming-ecology', name: '崇明·风散边界', subtitle: '生态区域控制行动', location: '崇明区 · 社区农园', wasteType: 'plastic', icon: '≈', accent: '#75eda0', background: `${legacy}/generated/bg_plastic.png`, available: true, briefing: '轻薄膜材在大风中越过围栏。阻止逸散、保护人员与作物，并为园区建立季节性收集节点。', lesson: ['轻薄塑料应防止逸散', '不以露天焚烧缩小体积', '生产场景需要专门管理与回收安排'], boss: '风膜群落', prototype: '崇明·定风薄膜原型' },
+  { id: 'campus-lab', name: '校园·维修实验课', subtitle: '诊断与风险隔离行动', location: '杨浦区 · 校园实验楼', wasteType: 'electronic', icon: '⌁', accent: '#aa91ff', background: '/art/scenes/repair-campus.png', available: true, briefing: '故障玩具、旧灯管和未擦除数据的平板同时进入实验楼。先识别哪些能修、哪些必须停止普通操作。', lesson: ['故障不等于报废', '危险维修有明确边界', '易破损有害垃圾需轻放并妥善包裹'], boss: '误诊拼装兽', prototype: '校园·维修判断原型' },
+  { id: 'mall-foodcourt', name: '五角场·午间分流', subtitle: '高峰分类行动', location: '杨浦区 · 商场餐区', wasteType: 'paper', icon: '▤', accent: '#ffd65a', background: `${legacy}/generated/market.png`, available: true, briefing: '餐区高峰让餐余、纸杯、餐盒和饮料瓶黏成一团。通过分离台、现场标识与人流引导守住批次纯度。', lesson: ['湿垃圾与包装先分离', '餐盒等专项回收取决于区域条件', '正确动线能降低每个人的判断负担'], boss: '油渍混投王', prototype: '五角场·清洁分流原型' },
+  { id: 'public-exhibition', name: '世博园·闭环公众日', subtitle: '四类材料终局预演', location: '浦东新区 · 公益活动现场', wasteType: 'textile', icon: '◆', accent: '#ff78ad', background: '/art/scenes/event-hall.png', available: true, briefing: '四类物料与数百名玩家同时进入现场。你要在安全、教育、流畅度和现实奖励之间完成一次公开可复盘的系统行动。', lesson: ['按风险和价值而不是曝光度分配资源', '实体奖励应按需生产并公开材料去向', '数字护照与实物兑换可以互补'], boss: '公益幻象壳', prototype: '世博园·城市闭环原型' },
+]
+
+const modeByRoute: Record<string, NonNullable<AdventureDefinition['modes']>> = {
+  'lujiazui-circuit': ['hazard-isolation', 'repair-bench', 'branch-expedition'], 'suzhou-plastic': ['pollution-control', 'eco-mechanism', 'material-escort'],
+  'yangpu-paper': ['material-escort', 'sorting-line', 'passport-hunt'], 'changning-textile': ['repair-bench', 'npc-commission', 'passport-hunt'],
+  'hongqiao-event': ['sorting-line', 'facility-defense', 'npc-commission'], 'lingang-logistics': ['material-escort', 'eco-mechanism', 'facility-defense'],
+  'chongming-ecology': ['pollution-control', 'eco-mechanism', 'passport-hunt'], 'campus-lab': ['repair-bench', 'hazard-isolation', 'npc-commission'],
+  'mall-foodcourt': ['sorting-line', 'pollution-control', 'facility-defense'], 'public-exhibition': ['finale-operation', 'facility-defense', 'branch-expedition'],
+  'heixushan-future': ['passport-hunt', 'npc-commission', 'branch-expedition'],
+}
+
+const buildRouteNodes = (route: AdventureDefinition): NonNullable<AdventureDefinition['routeNodes']> => [
+  { id: `${route.id}-story`, name: '现场证词', kind: 'story', description: '先听物品与当事人说完，获得一条风险证据。' },
+  { id: `${route.id}-skill`, name: '系统节点', kind: 'skill', description: '调用本区域专属玩法，改变污染与材料价值。' },
+  { id: `${route.id}-combat`, name: '污染压制', kind: 'combat', description: '移动、蓄力与定向技能净化游离污染体。' },
+  { id: `${route.id}-rest`, name: '维修整备', kind: 'rest', description: '根据前面判断选择本局构筑，不固定为纯伤害升级。' },
+  { id: `${route.id}-boss`, name: route.boss, kind: 'boss', description: `用证据击破污染外壳，回收${route.prototype}。` },
+]
+
+export const adventures: AdventureDefinition[] = [...baseAdventures, ...extraAdventures].map((route) => ({ ...route, chapter: route.id === 'heixushan-future' ? '未来区域' : '上海首发篇', modes: modeByRoute[route.id], routeNodes: buildRouteNodes(route) }))
+
 export const equipment: EquipmentItem[] = [
   { id: 'wrench-basic', name: '检修扳手', slot: 'weapon', rarity: '普通', description: '稳定可靠的近战工具。', stat: '攻击 +8', icon: `${legacy}/sprites/equip_wrench_basic.png`, cost: 0 },
   { id: 'wrench-green', name: '回流扳手', slot: 'weapon', rarity: '精良', description: '命中后回收散落能量。', stat: '攻击 +12 · 吸附 +8%', icon: `${legacy}/sprites/equip_wrench_green.png`, cost: 120 },
@@ -53,7 +81,7 @@ export const equipment: EquipmentItem[] = [
   { id: 'boots-basic', name: '防滑工作靴', slot: 'boots', rarity: '普通', description: '穿越湿滑处理区。', stat: '移速 +4%', icon: `${legacy}/sprites/equip_boots_basic.png`, cost: 0 },
 ]
 
-const portrait = (name: string) => `${legacy}/sprites/char_${name}.png`
+const portrait = (name: string) => name === 'bluecat' ? '/art/characters/loop-guide.png' : `${legacy}/sprites/char_${name}.png`
 const souvenir = (type: string, index: number) => `${legacy}/themes/${type}_souvenir_${index}.png`
 
 export const collectibles: Collectible[] = [
@@ -70,9 +98,15 @@ export const collectibles: Collectible[] = [
   { id: 'suzhou-core', name: '澄净树脂原型', type: 'plastic', source: '微塑潮汐兽', portrait: souvenir('plastic', 4), rarity: '原型', summary: '洁净和分材，是我重新成为材料的门票。', before: '残液和混材让我变成难以处理的污染潮。', action: '清空、分离、压缩，并让减量优先于回收。', after: '稳定树脂原型可作为现实奖励的数字凭证。' },
   { id: 'yangpu-core', name: '再生纤维原型', type: 'paper', source: '湿纸堡垒', portrait: souvenir('paper', 5), rarity: '原型', summary: '干燥、去杂和压平，让纤维价值留下来。', before: '水分、油污和胶带把纸材封成沉重堡垒。', action: '阻断污染源，再按处理顺序净化材料。', after: '被抢救的纤维成为城市记忆原型。' },
   { id: 'changning-core', name: '循环织物原型', type: 'textile', source: '快时尚拼接兽', portrait: souvenir('textile', 6), rarity: '原型', summary: '最好的回收，有时是继续被使用。', before: '过度购买和快速淘汰把衣物缝成巨大的污染壳。', action: '修补、交换、捐赠、再设计，最后才是材料再生。', after: '循环织物原型记录了一次价值保留行动。' },
+  { id: 'hongqiao-event-core', name: '周转展具原型', type: 'plastic', source: '一次性巨幕兽', portrait: souvenir('plastic', 6), rarity: '原型', summary: '活动物料的去向，应在搭建之前就被设计。', before: '短期喷绘、包装和展具在撤展时叠成一次性外壳。', action: '提前登记、拆分、回仓并为可复用模块匹配下一场活动。', after: '周转展具原型记录了从采购到撤场的完整责任链。' },
+  { id: 'lingang-logistics-core', name: '透明物流原型', type: 'plastic', source: '混装吞运体', portrait: souvenir('plastic', 7), rarity: '原型', summary: '正确分类以后，还需要可靠的返程与交接。', before: '清洁膜材和周转箱因雨水、混装与错单失去价值。', action: '按材料特性选择路线、防护与接收点，并如实记录损耗。', after: '透明物流原型让每一次去向都可以被核验。' },
+  { id: 'chongming-ecology-core', name: '定风薄膜原型', type: 'plastic', source: '风膜群落', portrait: souvenir('plastic', 5), rarity: '原型', summary: '轻质材料的第一条边界，是不让它离开管理区域。', before: '薄膜被大风带出围栏，在作物与水体之间扩散。', action: '先阻断逸散，再建立与季节用量匹配的收集和交接节点。', after: '定风薄膜原型记录了一套源头防逸散方案。' },
+  { id: 'campus-lab-core', name: '维修判断原型', type: 'electronic', source: '误诊拼装兽', portrait: souvenir('electronic', 6), rarity: '原型', summary: '会修不只是会拆，更是知道何时停止。', before: '故障设备、破损灯管和数据载体被同一种“动手欲”包围。', action: '先诊断、安全隔离和处理数据，再选择维修或正规退役。', after: '维修判断原型保存了最小干预与安全边界。' },
+  { id: 'mall-foodcourt-core', name: '清洁分流原型', type: 'paper', source: '油渍混投王', portrait: souvenir('paper', 6), rarity: '原型', summary: '好的动线能让正确选择变得更容易。', before: '餐余、纸杯、餐盒和饮料瓶在高峰人流中黏成混投外壳。', action: '通过倒液、拆分、清晰标识与满载管理保护批次纯度。', after: '清洁分流原型记录了人员、容器与收运共同工作的结果。' },
+  { id: 'public-exhibition-core', name: '城市闭环原型', type: 'textile', source: '公益幻象壳', portrait: souvenir('textile', 7), rarity: '原型', summary: '公益奖励本身也要经得起材料与去向的追问。', before: '活动为了传播环保而制造新的无计划物料，形成公益幻象。', action: '按风险分流现场物料，用数字护照和按需兑换连接真实行动。', after: '城市闭环原型成为可复盘、可兑现但不过度生产的纪念凭证。' },
 ]
 
-export const stories: StoryDefinition[] = [
+const legacyStories = [
   {
     id: 'battery-night', title: '电池没有睡着', subtitle: '一次发生在写字楼回收间的深夜对话', location: '陆家嘴 · 地下回收间', duration: '约 2 分钟', type: 'electronic', cover: `${legacy}/generated/lab.png`,
     beats: [
@@ -214,3 +248,6 @@ export const classificationChallenges = [
   { item: '干燥快递纸箱', icon: '📦', prompt: '投放前的合理动作是？', options: ['装入泡沫后封死', '浇湿避免扬尘', '取出异物、拆平并保持干燥'], answer: 2, explain: '去杂、拆平和保持干燥能提升收运效率并保留纸纤维价值。' },
   { item: '只掉一颗纽扣的衬衫', icon: '👕', prompt: '更优先的价值路径是？', options: ['修补后继续使用或流转', '立即剪碎做填充物', '当作其他垃圾'], answer: 0, explain: '能够继续使用的衣物优先修补、交换或二手流转，通常比材料降级更保值。' },
 ]
+
+void legacyStories
+export { stories, knowledgeSources } from './stories'

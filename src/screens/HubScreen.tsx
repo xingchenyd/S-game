@@ -1,4 +1,4 @@
-import { ArrowRight, BookOpen, Boxes, ChartNoAxesCombined, Gift, Map, Shirt, Sparkles } from 'lucide-react'
+import { ArrowRight, BookOpen, Boxes, ChartNoAxesCombined, Dumbbell, Gift, Map, Shirt, Sparkles } from 'lucide-react'
 import type { PlayerProfile, Screen } from '../types'
 
 interface Props { profile: PlayerProfile; onNavigate: (screen: Screen) => void }
@@ -8,7 +8,7 @@ export default function HubScreen({ profile, onNavigate }: Props) {
   return (
     <div className="hub-screen screen-enter">
       <section className="hub-hero pixel-panel">
-        <img src="/art/legacy/sprites/char_bluecat.png" alt="蓝猫守护员" />
+        <img src="/art/characters/loop-guide.png" alt="原创角色回环维修精灵" />
         <div>
           <span className="eyebrow">循环基地 · 上海站</span>
           <h1>早上好，{profile.username}</h1>
@@ -29,6 +29,9 @@ export default function HubScreen({ profile, onNavigate }: Props) {
         </button>
         <button className="facility-card museum" onClick={() => onNavigate('museum')}>
           <span className="facility-icon"><Boxes /></span><span className="facility-copy"><b>价值展馆</b><small>材料护照 · 原型档案 · 对话</small></span><span className="count-chip">{profile.collectibles.length}</span>
+        </button>
+        <button className="facility-card training" onClick={() => onNavigate('training')}>
+          <span className="facility-icon"><Dumbbell /></span><span className="facility-copy"><b>循环训练场</b><small>11类玩法 · 独立规则 · 关卡变体</small></span><span className="count-chip">{Object.keys(profile.modeMastery ?? {}).length}</span>
         </button>
         <button className="facility-card theater" onClick={() => onNavigate('theater')}>
           <span className="facility-icon"><BookOpen /></span><span className="facility-copy"><b>循环剧场</b><small>约两分钟的互动环境故事</small></span><span className="count-chip">{profile.storiesCompleted.length}</span>
