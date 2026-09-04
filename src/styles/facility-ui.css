@@ -153,3 +153,78 @@
 @media (prefers-reduced-motion:reduce) {
   .exhibit-detail-content { animation:none; }.facility-entry,.illustrated-mode,.mode-scene > img,.material-rooms button,.museum-screen .collection-card { transition:none; }
 }
+
+/* Museum outer frames: brass picture frame, catalogue tabs and bound paper.
+   Deliberately leaves collection cards, display-case and passport styling intact. */
+.game-shell:not(.is-world) .museum-screen > header.museum-title {
+  border:6px double #cbb27b !important;
+  border-radius:4px;
+  box-shadow:0 0 0 2px #4d3a24,0 12px 28px #0006,inset 0 0 0 8px #302a2080 !important;
+}
+.game-shell:not(.is-world) .museum-screen > header.museum-title::before {
+  display:block; content:''; position:absolute; inset:8px; width:auto; height:auto;
+  z-index:0; opacity:1; border:0; border-radius:0; transform:none; animation:none; pointer-events:none;
+  background:
+    linear-gradient(#ebd8a2,#ebd8a2) left top / 26px 2px no-repeat,
+    linear-gradient(#ebd8a2,#ebd8a2) left top / 2px 26px no-repeat,
+    linear-gradient(#ebd8a2,#ebd8a2) right top / 26px 2px no-repeat,
+    linear-gradient(#ebd8a2,#ebd8a2) right top / 2px 26px no-repeat,
+    linear-gradient(#ebd8a2,#ebd8a2) left bottom / 26px 2px no-repeat,
+    linear-gradient(#ebd8a2,#ebd8a2) left bottom / 2px 26px no-repeat,
+    linear-gradient(#ebd8a2,#ebd8a2) right bottom / 26px 2px no-repeat,
+    linear-gradient(#ebd8a2,#ebd8a2) right bottom / 2px 26px no-repeat;
+}
+.museum-title .facility-kicker {
+  border:1px solid #d4bb86; border-radius:2px; background:#322b20; color:#f5dfac;
+  box-shadow:inset 0 0 0 3px #322b20,inset 0 0 0 4px #8b754c;
+}
+.museum-title .facility-entry { border-radius:2px 12px 2px 12px; border:1px solid #d6b677; background:linear-gradient(#f8eac1,#d6b87b); box-shadow:0 4px 0 #5d482d; color:#33291c; }
+.museum-screen .museum-curator-seal {
+  border:4px double #9b7d49; border-radius:3px; color:#483720;
+  background:repeating-linear-gradient(0deg,#86653608 0 1px,transparent 1px 4px),#eddfba;
+  box-shadow:5px 5px 0 #392d1da6,inset 0 0 0 5px #fff2d1;
+}
+.museum-screen .museum-curator-seal > b { color:#61451d; text-shadow:none; }
+.museum-screen .museum-curator-seal b small,.museum-screen .museum-curator-seal > span { color:#53432d; }
+.museum-curator-seal .facility-meter { border-color:#947743; background:#c7b58b; border-radius:1px; }
+.museum-curator-seal .facility-meter i { background:#675d37; }
+.museum-screen .material-rooms button {
+  border:1px solid #c9aa6a; border-left:6px solid var(--exhibit-accent); border-radius:2px 14px 2px 14px;
+  background:linear-gradient(120deg,#fff4d9,#e5d2aa); color:#4d3d29;
+  box-shadow:inset 0 0 0 4px #f7ebcf,inset 0 0 0 5px #a48b596b,0 5px 0 #58482e,0 9px 17px #0004;
+}
+.museum-screen .material-rooms button.active { outline:3px solid #f2d28b; outline-offset:3px; background:linear-gradient(120deg,#fff9e7,#f5dfa9); }
+.museum-screen .material-rooms button > span { position:relative; }
+.museum-screen .material-rooms button b { color:#344d54; text-shadow:none; }
+.museum-screen .material-rooms button:nth-child(2) b { color:#365b41; }
+.museum-screen .material-rooms button:nth-child(3) b { color:#6c4b20; }
+.museum-screen .material-rooms button:nth-child(4) b { color:#753d56; }
+.museum-screen .material-rooms button small { color:#514533; }
+.museum-screen .material-rooms button em { color:#4b3b24; }
+.museum-screen .museum-toolbar {
+  margin-top:30px; border:1px solid #a28a5f; border-bottom:5px solid #685031; border-radius:3px;
+  background:linear-gradient(#4a4534,#383728); box-shadow:0 5px 15px #0004,inset 0 1px #e4cca76b;
+}
+.museum-screen .museum-tabs { gap:6px; }
+.museum-screen .museum-tabs button { border:1px solid #a78e60; border-bottom:3px solid #8d744b; border-radius:8px 8px 1px 1px; background:#332e22; color:#f6e7c4; }
+.museum-screen .museum-tabs button.active { background:#f4e6c2; border-color:#d6ba7b; color:#49351a; box-shadow:0 3px 0 #211d15; }
+.museum-screen .search-box { border:1px solid #a28b60; border-radius:2px; background:#eee3c8; color:#655136; box-shadow:inset 0 2px 4px #55412523; }
+.museum-screen .search-box input { color:#302c22; }
+.museum-screen .search-box input::placeholder { color:#675c48; }
+.museum-screen .search-box button { color:#493f2c; }
+.museum-screen .album-page {
+  border:1px solid #c3a86d; border-left:8px solid #756040; border-radius:3px 10px 10px 3px;
+  background:linear-gradient(90deg,#7f67342b,transparent 28px),repeating-linear-gradient(0deg,#a98d5208 0 1px,transparent 1px 5px),#e9dfc6;
+  box-shadow:3px 3px 0 #bda778,6px 6px 0 #63563e,0 14px 30px #0004,inset 4px 0 #cfb981;
+}
+.museum-screen .exhibit-section-heading { border-bottom:3px double #9b8556; padding-bottom:20px; }
+.museum-screen .exhibit-section-heading span { color:#655436; letter-spacing:.1em; }
+.museum-screen .exhibit-section-heading h2 { color:#393c2b; text-shadow:none; }
+.museum-screen .exhibit-section-heading > b { border:3px double #907340; border-radius:2px; color:#5d431e; background:#f8e9c3; }
+.museum-screen .album-page > .empty-state { color:#574c37; }
+@media (max-width:560px) {
+  .game-shell:not(.is-world) .museum-screen > header.museum-title { padding:24px 18px; }
+  .museum-screen .material-rooms button { padding:14px; }
+  .museum-screen .album-page { padding:15px 12px; border-left-width:5px; }
+  .museum-screen .museum-tabs { gap:4px; }
+}
