@@ -3,6 +3,7 @@ dist/
 *.log
 .DS_Store
 .vite/
+.cache/story-fonts/
 *.tsbuildinfo
 vite.config.js
 vite.config.d.ts

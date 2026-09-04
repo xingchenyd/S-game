@@ -5,6 +5,7 @@ import './styles/index.css'
 import './styles/ui-v4.css'
 import './styles/ui-v5.css'
 import './styles/facility-ui.css'
+import './styles/story-reader.css'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

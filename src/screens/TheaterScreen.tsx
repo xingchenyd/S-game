@@ -1,11 +1,11 @@
 import { ArrowLeft, BookOpen, Check, ChevronRight, Clock3, ExternalLink, MapPin, Pause, Play, RotateCcw, Search, SlidersHorizontal, Volume2, VolumeX } from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { knowledgeSources, stories } from '../data/content'
 import { speakChinese, stopSpeech } from '../store/audio'
 import type { PlayerProfile, StoryDefinition, WasteType } from '../types'
 import { assetUrl } from '../utils/assets'
 
-interface Props { profile: PlayerProfile; onChange: (profile: PlayerProfile) => void }
+interface Props { profile: PlayerProfile; onChange: (profile: PlayerProfile) => void; onImmersive?: (active: boolean) => void }
 const typeNames: Record<WasteType, string> = { electronic: '电子物', plastic: '塑料', paper: '纸材', textile: '织物' }
 type StoryTheme = StoryDefinition['theme']
 const themeMeta: { id: StoryTheme; name: string; kicker: string; description: string; cover: string; accent: string }[] = [
@@ -14,7 +14,7 @@ const themeMeta: { id: StoryTheme; name: string; kicker: string; description: st
   { id: 'heidushan', name: '黑独山 · 无痕边界', kicker: '地貌主题 / 3篇', description: '在脆弱地貌中学习克制：不越线、不取走、不让公益行动制造第二次打扰。', cover: assetUrl('art/theater/themes/heidushan.webp'), accent: '#b8c8dc' },
 ]
 
-export default function TheaterScreen({ profile, onChange }: Props) {
+export default function TheaterScreen({ profile, onChange, onImmersive }: Props) {
   const [story, setStory] = useState<StoryDefinition | null>(null)
   const [beat, setBeat] = useState(0)
   const [reply, setReply] = useState<{ text: string; insight?: string } | null>(null)
@@ -24,6 +24,9 @@ export default function TheaterScreen({ profile, onChange }: Props) {
   const [sourcesOpen, setSourcesOpen] = useState(false)
   const [speaking, setSpeaking] = useState(false)
   const [theme, setTheme] = useState<StoryTheme | null>(null)
+  const narrativeRef = useRef<HTMLDivElement>(null)
+  useLayoutEffect(() => { onImmersive?.(Boolean(story)); window.scrollTo({ top: 0, behavior: 'instant' }); return () => onImmersive?.(false) }, [Boolean(story), onImmersive])
+  useLayoutEffect(() => { if (narrativeRef.current) narrativeRef.current.scrollTop = 0 }, [beat, reply, finished])
 
   const themedStories = useMemo(() => stories.filter((item) => item.theme === theme), [theme])
   const filtered = useMemo(() => themedStories.filter((item) => (filter === 'all' || item.type === filter) && `${item.title}${item.subtitle}${item.location}${item.tags.join('')}`.toLowerCase().includes(query.trim().toLowerCase())), [filter, query, themedStories])
@@ -80,15 +83,17 @@ export default function TheaterScreen({ profile, onChange }: Props) {
 
   const current = story.beats[beat]
   const storySources = knowledgeSources.filter((source) => story.sourceIds.includes(source.id))
-  return <div className="dialogue-stage screen-enter" style={{ backgroundImage: `linear-gradient(0deg,#030a0ef5 0%,#030a0e44 65%), url(${story.cover})` }}>
-    <header className="dialogue-header"><button onClick={() => { stopSpeech(); setStory(null) }}><ArrowLeft /> 退出故事</button><div><small>{story.location}</small><b>{story.title}</b></div><span>{beat + 1} / {story.beats.length}</span></header>
-    <div className="dialogue-progress"><span style={{ width: `${(beat + 1) / story.beats.length * 100}%` }} /></div>
-    {!finished ? <section className="dialogue-box">
-      {current.portrait && <div className="dialogue-portrait"><img src={current.portrait} alt="" /></div>}
-      <div className="dialogue-copy"><div className="dialogue-speaker"><span>{reply ? '回应' : current.speaker}</span><button onClick={speak} aria-label={speaking ? '停止语音' : '播放本句语音'}>{speaking ? <Pause /> : <Volume2 />}{speaking ? '停止' : '语音预览'}</button></div><p>{reply ? reply.text : current.text}</p>{reply?.insight && <em>行动笔记 · {reply.insight}</em>}
+  return <div className="dialogue-stage story-reading-stage screen-enter">
+    <header className="dialogue-header"><button onClick={() => { stopSpeech(); setStory(null) }}><ArrowLeft /> 退出故事</button><div><small>{story.location}</small><h1>{story.title}</h1></div><span aria-label={`故事进度：第 ${beat + 1} 段，共 ${story.beats.length} 段`}>{beat + 1} <i>/ {story.beats.length}</i></span></header>
+    <div className="dialogue-progress" role="progressbar" aria-label="故事阅读进度" aria-valuemin={0} aria-valuemax={story.beats.length} aria-valuenow={beat + 1}><span style={{ width: `${(beat + 1) / story.beats.length * 100}%` }} /></div>
+    <div className="story-reading-layout">
+    {!finished ? <section className="dialogue-box" aria-label="剧情对白">
+      <div ref={narrativeRef} className="dialogue-copy"><div className="dialogue-speaker">{current.portrait && !reply && <div className="dialogue-portrait"><img src={current.portrait} alt={`${current.speaker}头像`} /></div>}<span>{reply ? '回应' : current.speaker}</span><button onClick={speak} aria-label={speaking ? '停止语音' : '播放本句语音'}>{speaking ? <Pause /> : <Volume2 />}{speaking ? '停止' : '语音预览'}</button></div><p>{reply ? reply.text : current.text}</p>{reply?.insight && <em>行动笔记 · {reply.insight}</em>}
         {!reply && current.choices ? <div className="dialogue-choices">{current.choices.map((choice) => <button key={choice.text} onClick={() => { stopSpeech(); setSpeaking(false); setReply({ text: choice.reply, insight: choice.insight }) }}>{choice.text}<ChevronRight /></button>)}</div> : <button className="dialogue-next" onClick={next}>{reply || beat < story.beats.length - 1 ? '继续' : '完成故事'} <ChevronRight /></button>}
       </div>
-    </section> : <section className="story-complete pixel-panel"><BookOpen /><span className="eyebrow">STORY COMPLETE</span><h2>故事已收录</h2><p>你完成了《{story.title}》，获得30行动积分。以下学习目标会在材料护照与行动关卡中再次出现。</p><div className="story-goals">{story.learningGoals.map((goal) => <span key={goal}><Check />{goal}</span>)}</div><div className="story-source-stamp"><b>{story.reviewStatus}</b><span>{storySources.map((source) => source.publisher).join(' · ')}</span></div><div><button className="secondary-button" onClick={() => { setBeat(0); setFinished(false) }}><RotateCcw /> 再读一次</button><button className="primary-button" onClick={() => setStory(null)}>返回剧场</button></div></section>}
+    </section> : <section className="story-complete pixel-panel"><BookOpen /><span className="eyebrow">STORY COMPLETE</span><h2>故事已收录</h2><p>你完成了《{story.title}》。首次收录可获得30行动积分。以下学习目标会在材料护照与行动关卡中再次出现。</p><div className="story-goals">{story.learningGoals.map((goal) => <span key={goal}><Check />{goal}</span>)}</div><div className="story-source-stamp"><b>{story.reviewStatus}</b><span>{storySources.map((source) => source.publisher).join(' · ')}</span></div><div><button className="secondary-button" onClick={() => { setBeat(0); setFinished(false) }}><RotateCcw /> 再读一次</button><button className="primary-button" onClick={() => setStory(null)}>返回剧场</button></div></section>}
+    <figure className="story-scene-art"><img src={story.cover} alt={`${story.location} · ${story.title}场景插画`} /><figcaption><span>{story.location}</span><small>场景插画 · 人物与事件为教育性虚构</small></figcaption></figure>
+    </div>
   </div>
 }
 

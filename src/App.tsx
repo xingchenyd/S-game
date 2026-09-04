@@ -88,7 +88,7 @@ export default function App() {
   switch (screen) {
     case 'adventure': content = <Suspense fallback={<div className="loading-screen"><span /><b>正在装配行动场景…</b></div>}><AdventureScreen profile={profile} onChange={updateProfile} onImmersive={setImmersive} /></Suspense>; break
     case 'museum': content = <MuseumScreen profile={profile} />; break
-    case 'theater': content = <TheaterScreen profile={profile} onChange={updateProfile} />; break
+    case 'theater': content = <TheaterScreen profile={profile} onChange={updateProfile} onImmersive={setImmersive} />; break
     case 'training': content = <TrainingScreen profile={profile} onChange={updateProfile} />; break
     case 'equipment': content = <EquipmentScreen profile={profile} onChange={updateProfile} notify={notify} />; break
     case 'skills': content = <SkillTreeScreen profile={profile} onChange={updateProfile} notify={notify} />; break

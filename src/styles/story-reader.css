@@ -1,0 +1,61 @@
+@font-face { font-family:'SGame Story Brush'; src:url('/fonts/story-brush.woff2') format('woff2'); font-weight:400; font-style:normal; font-display:swap; }
+@font-face { font-family:'SGame Story Kai'; src:url('/fonts/story-kai.woff2') format('woff2'); font-weight:400 700; font-style:normal; font-display:swap; }
+
+/* Typography is local to the theater. Long dialogue uses a readable handwritten
+   face; display titles use genuine brush glyphs instead of simulated bold. */
+.screen-theater { --story-brush:'SGame Story Brush','KaiTi',serif; --story-kai:'SGame Story Kai','KaiTi','STKaiti',serif; }
+.screen-theater .theater-screen h1,.screen-theater .theater-screen h2,
+.screen-theater .theme-copy > b,.screen-theater .story-info > b { font-family:var(--story-brush); font-weight:400; letter-spacing:.04em; }
+.screen-theater .story-info > small,.screen-theater .story-info > em,
+.screen-theater .theme-copy > em,.screen-theater .theater-screen p { font-family:var(--story-kai); font-weight:500; }
+.game-shell.screen-theater.is-immersive { padding:0 0 calc(78px + var(--safe-bottom)); background:radial-gradient(ellipse at 80% 75%,#273b41,#081820 70%); }
+.game-shell.screen-theater.is-immersive .game-content { width:100%; max-width:none; background:transparent; }
+.story-reading-stage.dialogue-stage { display:block; min-height:calc(100dvh - 78px - var(--safe-bottom)); padding:0; margin:0; border:0; border-radius:0; box-shadow:none; background:none; }
+.game-shell.screen-theater .story-reading-stage > header.dialogue-header {
+  position:relative; inset:auto; display:grid; grid-template-columns:150px minmax(0,1fr) 100px;
+  min-height:96px; margin:0; padding:12px 28px; border:0; border-bottom:1px solid #b5a576;
+  border-radius:0; background:linear-gradient(100deg,#102831,#182c34 65%,#243032) !important;
+  box-shadow:0 4px 20px #0004 !important;
+}
+.game-shell.screen-theater .story-reading-stage > header.dialogue-header::before,
+.game-shell.screen-theater .story-reading-stage > header.dialogue-header::after { display:none; }
+.story-reading-stage .dialogue-header > div { display:grid; gap:6px; padding:0 14px; min-width:0; }
+.story-reading-stage .dialogue-header small { font:400 clamp(20px,1.55vw,28px)/1.3 var(--story-brush); color:#ecd2a0; letter-spacing:.1em; }
+.game-shell.screen-theater .story-reading-stage .dialogue-header h1 { margin:0; font:400 clamp(26px,2.35vw,40px)/1.2 var(--story-brush); color:#fff4dc; letter-spacing:.04em; text-shadow:0 2px 0 #060f18; }
+.story-reading-stage .dialogue-header > button { min-height:48px; font:400 24px var(--story-brush); color:#f4e4bd; white-space:nowrap; }
+.story-reading-stage .dialogue-header > span { font:500 25px var(--story-kai); color:#f1d9a0; white-space:nowrap; }.story-reading-stage .dialogue-header > span i { font-style:normal; font-size:18px; color:#b5cacc; }
+.story-reading-stage .dialogue-progress { position:relative; inset:auto; height:3px; background:#28424a; }
+.story-reading-stage .dialogue-progress span { background:linear-gradient(90deg,#e7cf98,#86cbbd); }
+.story-reading-layout { display:grid; grid-template-columns:clamp(340px,28vw,460px) minmax(0,1fr); gap:28px; align-items:start; min-height:calc(100dvh - 181px - var(--safe-bottom)); padding:24px 24px 0 0; }
+.story-reading-stage .dialogue-box { display:block; width:100%; min-width:0; margin:0; align-self:stretch; }
+.story-reading-stage .dialogue-copy { width:100%; min-height:0; padding:24px 26px; border:0; border-right:1px solid #7e927c; border-radius:0 15px 15px 0; background:linear-gradient(120deg,#152f35,#0b232b); box-shadow:7px 8px 20px #0003; backdrop-filter:none; }
+.story-reading-stage .dialogue-speaker { display:flex; flex-wrap:wrap; gap:12px; align-items:center; padding-bottom:16px; border-bottom:1px solid #8c997455; }
+.story-reading-stage .dialogue-speaker > span { font:400 32px/1.15 var(--story-brush); color:#f4d399; max-width:100%; overflow-wrap:anywhere; }
+.story-reading-stage .dialogue-speaker > button { margin-left:auto; min-height:44px; padding:7px 10px; gap:5px; border:1px solid #566f6f; border-radius:6px; font:500 16px var(--story-kai); white-space:nowrap; color:#dce6d6; background:#10282e; }
+.story-reading-stage .dialogue-portrait { width:56px; height:64px; flex:none; display:grid; place-items:center; border:1px solid #58736c; border-radius:10px; background:#1c3c3b; overflow:hidden; }
+.story-reading-stage .dialogue-portrait img { width:100%; height:100%; max-height:64px; object-fit:contain; filter:none; }
+.story-reading-stage .dialogue-copy > p { min-height:0; margin:19px 0 22px; color:#f2ecda; font:500 clamp(19px,1.32vw,23px)/1.85 var(--story-kai); letter-spacing:.035em; overflow-wrap:break-word; }
+.story-reading-stage .dialogue-copy > em { margin:0 0 16px; padding:12px; border-left:3px solid #91cead; border-radius:0 8px 8px 0; background:#16392e; font:500 16px/1.7 var(--story-kai); color:#d6f0d8; }
+.story-reading-stage .dialogue-choices { gap:12px; }.story-reading-stage .dialogue-choices button { min-height:56px; gap:12px; padding:12px; border:1px solid #607b79; border-left:3px solid #d1b478; border-radius:3px 10px 10px 3px; background:#1b363e; color:#f3e9cf; font:500 18px/1.5 var(--story-kai); }
+.story-reading-stage .dialogue-choices button svg { flex:none; width:18px; }.story-reading-stage .dialogue-choices button:hover { background:#29493f; border-color:#ead49c; }
+.story-reading-stage .dialogue-next { float:none; display:flex; width:100%; justify-content:space-between; min-height:52px; padding:10px 18px; border:1px solid #cfba87; border-radius:3px 10px 3px 10px; background:linear-gradient(#ead7a7,#cbb07b); color:#253431; font:400 25px var(--story-brush); }
+.story-scene-art { min-width:0; width:100%; margin:0; align-self:end; display:grid; gap:12px; }
+.story-scene-art > img { display:block; width:100%; height:auto; max-height:calc(100dvh - 232px - var(--safe-bottom)); object-fit:contain; object-position:right bottom; border:0; border-radius:3px; box-shadow:0 10px 30px #0005; }
+.story-scene-art figcaption { display:flex; justify-content:space-between; gap:15px; align-items:center; padding:0 2px; color:#d9cdaa; }
+.story-scene-art figcaption > span { font:400 21px/1.4 var(--story-brush); }.story-scene-art figcaption small { font:500 13px/1.5 var(--story-kai); color:#b1c2c3; }
+.story-reading-stage .story-complete { align-self:start; width:100%; margin:0; padding:24px; text-align:left; }
+.story-reading-stage .story-complete h2 { font:400 34px var(--story-brush); color:#f4d399; }.story-reading-stage .story-complete p,.story-reading-stage .story-goals span { font:500 18px/1.7 var(--story-kai); color:#e4eadb; }
+.story-reading-stage .story-complete > div:last-child { display:grid; grid-template-columns:1fr; }.story-reading-stage .story-complete button { font-family:var(--story-kai); font-size:18px; }
+@media (min-width:1500px) { .story-reading-layout { gap:40px; padding-right:32px; }.story-reading-stage .dialogue-copy { padding:28px 32px; } }
+@media (max-width:850px) {
+  .game-shell.screen-theater .story-reading-stage > header.dialogue-header { grid-template-columns:100px minmax(0,1fr) 60px; padding:12px 14px; min-height:94px; }
+  .story-reading-stage .dialogue-header > button { font-size:20px; }.story-reading-stage .dialogue-header > div { padding:0 6px; }.story-reading-stage .dialogue-header small { font-size:18px; letter-spacing:.02em; }.game-shell.screen-theater .story-reading-stage .dialogue-header h1 { font-size:25px; }
+  .story-reading-layout { grid-template-columns:1fr; gap:18px; min-height:0; padding:18px 14px 0; }
+  .story-scene-art { grid-row:1; }.story-scene-art > img { max-height:38dvh; object-position:center; }.story-scene-art figcaption { align-items:start; }.story-scene-art figcaption > span { font-size:18px; }.story-scene-art figcaption small { max-width:45%; font-size:11px; }
+  .story-reading-stage .dialogue-copy { padding:20px; border:1px solid #516e68; border-radius:4px 14px 14px 4px; }.story-reading-stage .dialogue-copy > p { font-size:20px; }
+}
+@media (max-width:480px) {
+  .game-shell.screen-theater .story-reading-stage > header.dialogue-header { grid-template-columns:1fr auto; gap:8px; padding:10px 14px 14px; }
+  .story-reading-stage .dialogue-header > div { grid-column:1/-1; grid-row:2; padding:0; text-align:left; }.story-reading-stage .dialogue-header > span { grid-column:2; grid-row:1; }.story-reading-stage .dialogue-header > button { min-height:40px; }.story-reading-stage .dialogue-header small { font-size:20px; }.game-shell.screen-theater .story-reading-stage .dialogue-header h1 { font-size:28px; }
+  .story-reading-stage .dialogue-copy { padding:18px; }.story-reading-stage .dialogue-speaker { gap:8px; }.story-reading-stage .dialogue-speaker > span { font-size:29px; }.story-reading-stage .dialogue-speaker > button { font-size:14px; padding:7px; }.story-reading-stage .dialogue-portrait { width:44px; height:52px; }
+}
