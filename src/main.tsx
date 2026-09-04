@@ -4,6 +4,7 @@ import App from './App'
 import './styles/index.css'
 import './styles/ui-v4.css'
 import './styles/ui-v5.css'
+import './styles/facility-ui.css'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
