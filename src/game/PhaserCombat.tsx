@@ -6,6 +6,7 @@ import { bosses, elitesFor, enemiesFor, type EnemyDefinition } from '../data/ene
 import { difficultyTuning } from '../data/balance'
 import { assetUrl } from '../utils/assets'
 import GameIcon from '../components/GameIcon'
+import { getWeaponBehavior } from '../data/weaponBehaviors'
 
 export interface BattleResult { purified: number; damageTaken: number; value: number }
 
@@ -81,7 +82,8 @@ class ActionScene extends Phaser.Scene {
   constructor(private props: Props) { super('action') }
 
   private get tuning() { return difficultyTuning[this.props.difficulty] }
-  private get weaponMode() { return this.props.weaponId === 'wrench-blue' ? 'sigil' : this.props.weaponId === 'wrench-gold' ? 'hybrid' : 'bolt' }
+  private get weaponBehavior() { return getWeaponBehavior(this.props.weaponId) }
+  private get weaponMode() { return this.weaponBehavior.mode }
   private get attackMultiplier() { return this.time.now < this.attackBoostUntil ? 1.35 : 1 }
 
   preload() {
@@ -327,24 +329,28 @@ class ActionScene extends Phaser.Scene {
 
   private activeAttack(x: number, y: number) {
     if (this.ended || this.time.now < this.activeAttackAt) return
-    const useSigil = this.weaponMode === 'sigil' || (this.weaponMode === 'hybrid' && (this.hybridSigil = !this.hybridSigil))
+    if (this.weaponMode === 'shear') return this.castArcShear(x, y)
+    const useSigil = ['sigil', 'anchor'].includes(this.weaponMode) || (this.weaponMode === 'hybrid' && (this.hybridSigil = !this.hybridSigil))
     if (useSigil) this.castSigil(x, y)
     else this.fireManualBolt(x, y)
   }
 
   private fireManualBolt(x: number, y: number) {
-    this.activeAttackAt = this.time.now + 270 / this.props.combatStats.attackSpeed
+    this.activeAttackAt = this.time.now + this.weaponBehavior.clickCooldown / this.props.combatStats.attackSpeed
     const direction = new Phaser.Math.Vector2(x - this.hero.x, y - this.hero.y).normalize()
     if (!direction.lengthSq()) return
     this.lastDirection.copy(direction)
     this.manualShots += 1
     const crit = Math.random() < this.props.combatStats.critChance
     const damage = Math.round(this.props.combatStats.attack * (crit ? 2.05 : 1.35) * this.attackMultiplier)
-    const spread = this.props.weaponId === 'wrench-basic' && this.manualShots % 4 === 0 ? [-.16, 0, .16] : [0]
-    spread.forEach((offset) => {
+    const spread = this.weaponMode === 'prism' ? [-.14, 0, .14] : this.weaponMode === 'swarm' ? [-.1, 0, .1] : this.weaponMode === 'bolt' && this.manualShots % 4 === 0 ? [-.16, 0, .16] : [0]
+    const swarmTargets = this.weaponMode === 'swarm' ? this.enemies.getChildren().map((item) => item as Phaser.Physics.Arcade.Sprite).filter((item) => item.active).sort((a, b) => Phaser.Math.Distance.Between(x, y, a.x, a.y) - Phaser.Math.Distance.Between(x, y, b.x, b.y)).slice(0, 3) : []
+    spread.forEach((offset, index) => {
       const shotDirection = direction.clone().rotate(offset)
       const projectile = this.projectiles.create(this.hero.x + shotDirection.x * 18, this.hero.y - 7 + shotDirection.y * 18, 'spark') as Phaser.Physics.Arcade.Image
-      projectile.setScale(crit ? .34 : .27).setDepth(7).setTint(crit ? 0xffdf62 : this.props.weaponId === 'wrench-green' ? 0x78f0a4 : 0x65e8ff).setData('damage', spread.length > 1 ? Math.round(damage * .72) : damage).setData('homing', false).setVelocity(shotDirection.x * 720, shotDirection.y * 720)
+      const target = swarmTargets[index % Math.max(1, swarmTargets.length)]
+      const homing = this.weaponMode === 'swarm' && Boolean(target)
+      projectile.setScale(crit ? .34 : this.weaponMode === 'swarm' ? .2 : .27).setDepth(7).setTint(crit ? 0xffdf62 : this.weaponBehavior.color).setData('damage', spread.length > 1 ? Math.round(damage * (this.weaponMode === 'swarm' ? .56 : .72)) : damage).setData('homing', homing).setData('active', true).setData('target', target).setVelocity(shotDirection.x * 720, shotDirection.y * 720)
       this.time.delayedCall(900, () => projectile.active && projectile.destroy())
     })
     const muzzle = this.add.star(this.hero.x + direction.x * 17, this.hero.y - 7 + direction.y * 17, 6, 4, 11, crit ? 0xffd65a : 0xb9fbff, .92).setDepth(8).setRotation(direction.angle())
@@ -353,19 +359,24 @@ class ActionScene extends Phaser.Scene {
   }
 
   private castSigil(x: number, y: number) {
-    this.activeAttackAt = this.time.now + (this.weaponMode === 'hybrid' ? 620 : 760) / this.props.combatStats.cooldownRate
+    this.activeAttackAt = this.time.now + this.weaponBehavior.clickCooldown / this.props.combatStats.cooldownRate
     const targetX = Phaser.Math.Clamp(x, 55, 905)
     const targetY = Phaser.Math.Clamp(y, 55, 485)
-    const radius = this.weaponMode === 'hybrid' ? 82 : 96
-    const outer = this.add.circle(targetX, targetY, radius, 0x865dff, .1).setStrokeStyle(4, 0xc7b7ff, .9).setDepth(7)
+    const radius = this.weaponMode === 'anchor' ? 132 : this.weaponMode === 'hybrid' ? 78 : 98
+    const tint = this.weaponMode === 'anchor' ? 0x4fa6ff : 0x865dff
+    const outer = this.add.circle(targetX, targetY, radius, tint, .1).setStrokeStyle(4, this.weaponBehavior.color, .9).setDepth(7)
     const inner = this.add.circle(targetX, targetY, radius * .52, 0xff78ad, .08).setStrokeStyle(3, 0x70f0ff, .85).setDepth(7)
-    this.tweens.add({ targets: [outer, inner], angle: 150, scale: .72, duration: 340, ease: 'Sine.easeIn' })
-    this.time.delayedCall(340, () => {
+    const delay = this.weaponMode === 'anchor' ? 470 : 300
+    this.tweens.add({ targets: [outer, inner], angle: 150, scale: .72, duration: delay, ease: 'Sine.easeIn' })
+    this.time.delayedCall(delay, () => {
       if (!outer.active) return
       this.cameras.main.shake(this.profileShake ? 70 : 0, .004)
       this.enemies.getChildren().forEach((item) => {
         const enemy = item as Phaser.Physics.Arcade.Sprite
-        if (enemy.active && Phaser.Math.Distance.Between(targetX, targetY, enemy.x, enemy.y) <= radius) this.damageEnemy(enemy, Math.round(this.props.combatStats.attack * 1.75 * this.attackMultiplier), true)
+        if (enemy.active && Phaser.Math.Distance.Between(targetX, targetY, enemy.x, enemy.y) <= radius) {
+          if (this.weaponMode === 'anchor') enemy.setData('slowedUntil', this.time.now + 1800)
+          this.damageEnemy(enemy, Math.round(this.props.combatStats.attack * (this.weaponMode === 'anchor' ? 2.3 : 1.75) * this.attackMultiplier), true)
+        }
       })
       const bloom = this.add.circle(targetX, targetY, 22, 0xc9baff, .72).setDepth(8)
       this.tweens.add({ targets: bloom, scale: 5.5, alpha: 0, duration: 330, onComplete: () => bloom.destroy() })
@@ -373,9 +384,26 @@ class ActionScene extends Phaser.Scene {
     })
   }
 
+  private castArcShear(x: number, y: number) {
+    this.activeAttackAt = this.time.now + this.weaponBehavior.clickCooldown / this.props.combatStats.attackSpeed
+    const direction = new Phaser.Math.Vector2(x - this.hero.x, y - this.hero.y).normalize()
+    if (!direction.lengthSq()) return
+    this.lastDirection.copy(direction)
+    const range = 125
+    const arc = this.add.arc(this.hero.x, this.hero.y - 6, 76, -55, 55, false, this.weaponBehavior.color, .2).setStrokeStyle(11, this.weaponBehavior.color, .92).setDepth(8).setRotation(direction.angle())
+    this.tweens.add({ targets: arc, scale: 1.45, alpha: 0, duration: 155, onComplete: () => arc.destroy() })
+    this.enemies.getChildren().forEach((item) => {
+      const enemy = item as Phaser.Physics.Arcade.Sprite
+      if (!enemy.active) return
+      const toward = new Phaser.Math.Vector2(enemy.x - this.hero.x, enemy.y - this.hero.y)
+      if (toward.length() <= range && toward.normalize().dot(direction) > .35) this.damageEnemy(enemy, Math.round(this.props.combatStats.attack * 1.18 * this.attackMultiplier), true)
+    })
+    playUiSound('click', .38)
+  }
+
   private hitEnemy(projectile: Phaser.Physics.Arcade.Image, enemy: Phaser.Physics.Arcade.Sprite) {
     const damage = projectile.getData('damage') as number
-    const active = !projectile.getData('homing')
+    const active = (projectile.getData('active') as boolean | undefined) ?? !projectile.getData('homing')
     projectile.destroy()
     this.damageEnemy(enemy, damage, active)
   }
@@ -398,7 +426,7 @@ class ActionScene extends Phaser.Scene {
     this.tweens.add({ targets: number, y: number.y - 24, alpha: 0, duration: active ? 520 : 380, onComplete: () => number.destroy() })
     if (this.props.builds.includes('pulse') && Math.random() < .18) enemy.setData('slowedUntil', this.time.now + 700)
     this.checkBossPhase(enemy, hp)
-    if (active && allowChain && this.props.weaponId === 'wrench-green') {
+    if (active && allowChain && this.weaponMode === 'chain') {
       const next = this.enemies.getChildren().map((item) => item as Phaser.Physics.Arcade.Sprite).filter((item) => item.active && item !== enemy && Phaser.Math.Distance.Between(enemy.x, enemy.y, item.x, item.y) < 170).sort((a, b) => Phaser.Math.Distance.Between(enemy.x, enemy.y, a.x, a.y) - Phaser.Math.Distance.Between(enemy.x, enemy.y, b.x, b.y))[0]
       if (next) {
         const chain = this.add.line(0, 0, enemy.x, enemy.y, next.x, next.y, 0x7ef2b0, .85).setOrigin(0).setLineWidth(3).setDepth(8)

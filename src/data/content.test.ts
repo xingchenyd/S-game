@@ -5,6 +5,7 @@ import { baseEnemies, bosses, eliteEnemies } from './enemies'
 import { shanghaiCampaign } from './campaign'
 import { resolveSkillEffects, skillNodes } from './skills'
 import { difficultyTuning, resolveCombatStats } from './balance'
+import { equipmentSets, weaponBehaviors } from './weaponBehaviors'
 
 describe('game content integrity', () => {
   it('uses unique stable ids', () => {
@@ -117,6 +118,21 @@ describe('game content integrity', () => {
     const rarityPower = new Map<string, Set<number>>()
     equipment.forEach((item) => { if (!rarityPower.has(item.rarity)) rarityPower.set(item.rarity, new Set()); rarityPower.get(item.rarity)?.add(item.power) })
     for (const powers of rarityPower.values()) expect(powers.size).toBe(1)
+  })
+
+  it('ships eight distinct weapons and four complete equipment sets', () => {
+    const weapons = equipment.filter((item) => item.slot === 'weapon')
+    expect(weapons).toHaveLength(8)
+    expect(new Set(weapons.map((item) => item.icon)).size).toBe(8)
+    expect(new Set(Object.values(weaponBehaviors).map((item) => item.mode)).size).toBe(8)
+    for (const setId of Object.keys(equipmentSets)) {
+      const pieces = equipment.filter((item) => item.setId === setId)
+      expect(pieces).toHaveLength(4)
+      expect(new Set(pieces.map((item) => item.slot))).toEqual(new Set(['weapon', 'helmet', 'armor', 'boots']))
+    }
+    const cityStats = resolveCombatStats({ equipped: { weapon: 'wrench-basic', helmet: 'helmet-basic', armor: 'armor-basic', boots: 'boots-basic' }, unlockedSkills: [] })
+    expect(cityStats.moveSpeed).toBeGreaterThanOrEqual(228)
+    expect(cityStats.attack).toBeGreaterThan(18)
   })
 
   it('changes more than health across three difficulty tiers', () => {

@@ -85,6 +85,9 @@ export interface EquipmentItem {
   power: number
   modifiers: Partial<CombatStats>
   perk?: string
+  setId?: EquipmentSetId
+  setName?: string
+  weaponMode?: WeaponMode
   icon: string
   cost: number
 }
@@ -127,6 +130,9 @@ export interface SkillNode {
   routeAbility?: string
   perks?: Partial<SkillEffects>
 }
+
+export type EquipmentSetId = 'city' | 'river' | 'insulation' | 'prototype'
+export type WeaponMode = 'bolt' | 'chain' | 'sigil' | 'hybrid' | 'prism' | 'swarm' | 'anchor' | 'shear'
 
 export interface SkillEffects {
   secondWindShield: number

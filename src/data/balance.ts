@@ -1,6 +1,7 @@
 import type { CombatStats, Difficulty, DifficultyTuning, EquippedItems, PlayerProfile } from '../types'
 import { equipment } from './content'
 import { skillNodes } from './skills'
+import { equipmentSets } from './weaponBehaviors'
 
 export const difficultyTuning: Record<Difficulty, DifficultyTuning> = {
   experience: { id: 'experience', name: '简单', audience: '活动现场与首次体验', enemyHp: .76, enemyDamage: .65, spawnRate: .82, pollutionRate: .68, telegraphTime: 1.35, reward: .85, aimAssist: 1.35 },
@@ -16,9 +17,17 @@ const add = (target: CombatStats, modifiers: Partial<CombatStats>) => {
 
 export const resolveCombatStats = (profile: Pick<PlayerProfile, 'equipped' | 'unlockedSkills'>): CombatStats => {
   const stats = { ...baseCombatStats }
+  const setCounts: Partial<Record<keyof typeof equipmentSets, number>> = {}
   for (const id of Object.values(profile.equipped as EquippedItems)) {
     const item = equipment.find((entry) => entry.id === id)
-    if (item) add(stats, item.modifiers)
+    if (item) {
+      add(stats, item.modifiers)
+      if (item.setId) setCounts[item.setId] = (setCounts[item.setId] ?? 0) + 1
+    }
+  }
+  for (const [setId, count] of Object.entries(setCounts) as [keyof typeof equipmentSets, number][]) {
+    if (count >= 2) add(stats, equipmentSets[setId].twoModifiers)
+    if (count >= 4) add(stats, equipmentSets[setId].fourModifiers)
   }
   for (const id of profile.unlockedSkills) {
     const skill = skillNodes.find((entry) => entry.id === id)

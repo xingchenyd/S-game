@@ -6,6 +6,7 @@ import { assetUrl } from '../utils/assets'
 interface Props { mission: CampaignMission; adventure: AdventureDefinition; previewTargets: boolean; onComplete: () => void }
 interface Position { x: number; y: number }
 const targetPositions = [{ x: 21, y: 26 }, { x: 74, y: 32 }, { x: 55, y: 73 }]
+const evidenceArt = ['asset-tag', 'manifest', 'material-sample', 'battery-case', 'reusable-buckle']
 
 export default function ExplorationRoom({ mission, adventure, previewTargets, onComplete }: Props) {
   const held = useRef(new Set<string>())
@@ -16,7 +17,11 @@ export default function ExplorationRoom({ mission, adventure, previewTargets, on
   const [facing, setFacing] = useState<'front' | 'back' | 'right' | 'left'>('front')
   const [moving, setMoving] = useState(false)
   const [frame, setFrame] = useState(0)
-  const targets = useMemo(() => targetPositions.map((target, index) => ({ ...target, label: mission.evidence[index] })), [mission.evidence])
+  const targets = useMemo(() => targetPositions.map((target, index) => ({
+    ...target,
+    label: mission.evidence[index],
+    art: assetUrl(`art/evidence/${evidenceArt[(mission.order + index - 1) % evidenceArt.length]}.webp`),
+  })), [mission.evidence, mission.order])
 
   useEffect(() => {
     const down = (event: KeyboardEvent) => {
@@ -69,11 +74,16 @@ export default function ExplorationRoom({ mission, adventure, previewTargets, on
     onPointerUp: () => held.current.delete(key), onPointerCancel: () => held.current.delete(key),
   })
 
-  return <section className="exploration-room" style={{ '--room-art': `url(${adventure.background})`, '--accent': adventure.accent } as React.CSSProperties}>
-    <div className="room-brief"><span className="eyebrow">MOVEABLE ROOM · {mission.location}</span><h2>{mission.title}</h2><p>{mission.objective}</p><b><ScanSearch /> 已发现 {found.length}/3</b></div>
+  return <section className="exploration-room" style={{ '--room-art': `url(${assetUrl(`art/campaign/${mission.id}.webp`)})`, '--accent': adventure.accent } as React.CSSProperties}>
+    <div className="room-brief"><span className="eyebrow">现场调查 · {mission.location}</span><h2>{mission.title}</h2><p>{mission.objective} 靠近发光物证即可完成记录。</p><b><ScanSearch /> 证据进度 {found.length}/3</b></div>
     <div className="room-stage">
       <span className="room-floor" /><span className="room-light" />
-      {targets.map((target, index) => <span key={target.label} className={`room-target ${found.includes(index) ? 'found' : ''} ${previewTargets ? 'preview' : ''}`} style={{ left: `${target.x}%`, top: `${target.y}%` }}><MapPin /><b>{found.includes(index) ? `${target.label} · 已记录` : previewTargets ? target.label : '未知信号'}</b></span>)}
+      {targets.map((target, index) => <span key={target.label} className={`room-target ${found.includes(index) ? 'found' : ''} ${previewTargets ? 'preview' : ''}`} style={{ left: `${target.x}%`, top: `${target.y}%` }}>
+        <i className="evidence-aura" />
+        <img src={target.art} alt={found.includes(index) || previewTargets ? target.label : '待调查物证'} />
+        <MapPin className="evidence-pin" />
+        <b>{found.includes(index) ? `${target.label} · 已记录` : previewTargets ? `${target.label} · 靠近调查` : '可疑物件 · 靠近调查'}</b>
+      </span>)}
       <span className={`room-player face-${facing} ${moving ? 'is-moving' : ''}`} style={{ left: `${position.x}%`, top: `${position.y}%` }}><img src={sprite} alt="行动员" /><i /></span>
       <div className="room-dpad" aria-label="移动控制"><button {...hold('arrowup')} aria-label="向上移动"><ArrowUp /></button><button {...hold('arrowleft')} aria-label="向左移动"><ArrowLeft /></button><button {...hold('arrowdown')} aria-label="向下移动"><ArrowDown /></button><button {...hold('arrowright')} aria-label="向右移动"><ArrowRight /></button></div>
     </div>

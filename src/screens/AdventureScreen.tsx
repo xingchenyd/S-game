@@ -11,6 +11,7 @@ import { difficultyTuning, resolveCombatStats } from '../data/balance'
 import { startMusic } from '../store/audio'
 import type { AdventureDefinition, CampaignMission, Difficulty, PlayerProfile, RunMetrics } from '../types'
 import { assetUrl } from '../utils/assets'
+import { getWeaponBehavior } from '../data/weaponBehaviors'
 
 type Phase = 'briefing' | 'room' | 'combat' | 'classify' | 'build' | 'boss' | 'result' | 'defeat'
 
@@ -133,7 +134,7 @@ export default function AdventureScreen({ profile, onChange, onImmersive }: Prop
     </section>
   </div>
 
-  const weaponMode = profile.equipped.weapon === 'wrench-blue' ? { name: '定点法阵', detail: '点击场地召唤延迟范围净化阵', tone: 'sigil' } : profile.equipped.weapon === 'wrench-gold' ? { name: '原型混合武装', detail: '点击交替发射弹体与范围法阵', tone: 'hybrid' } : profile.equipped.weapon === 'wrench-green' ? { name: '链式净化弹', detail: '命中后跳转至附近第二个目标', tone: 'chain' } : { name: '定向净化弹', detail: '每第四次点击发射三向散射弹', tone: 'bolt' }
+  const weaponMode = getWeaponBehavior(profile.equipped.weapon)
   return <div className={`run-screen run-theme-${selected.wasteType} screen-enter`}>
     <header className="run-hud">
       <button onClick={reset} aria-label="退出本局"><ArrowLeft /></button>
@@ -154,7 +155,7 @@ export default function AdventureScreen({ profile, onChange, onImmersive }: Prop
       {phase === 'boss' && Boolean(metrics.bossMaxHp) && <div className="boss-hud"><span><GameIcon name="boss" size={44} /><small>污染外壳 · 阶段作战</small><b>{selected.boss}</b></span><div><i style={{ width: `${Math.max(0, (metrics.bossHp ?? 0) / Math.max(1, metrics.bossMaxHp ?? 1) * 100)}%` }} /></div><em>{Math.ceil(metrics.bossHp ?? 0)} / {metrics.bossMaxHp}</em></div>}
       <div className="combat-corner-ui">
         <div className="combat-minimap" aria-label="战斗雷达"><header><GameIcon name="radar" size={30} /><span>区域雷达</span></header><div>{metrics.radar?.map((enemy, index) => <i key={`${index}-${enemy.x}-${enemy.y}`} className={enemy.boss ? 'boss' : ''} style={{ left: `${enemy.x}%`, top: `${enemy.y}%` }} />)}<b style={{ left: `${metrics.playerX ?? 50}%`, top: `${metrics.playerY ?? 50}%` }} /></div></div>
-        <div className={`active-attack-guide ${weaponMode.tone}`}><GameIcon name="attack" size={44} /><span><small>主动武器 · 主要伤害</small><b>{weaponMode.name}</b><em>{weaponMode.detail}</em></span></div>
+        <div className={`active-attack-guide ${weaponMode.mode}`}><GameIcon name="attack" size={44} /><span><small>主动武器 · 连续点击可加快输出</small><b>{weaponMode.name}</b><em>{weaponMode.detail}</em></span></div>
       </div>
       <div className="combat-buff-stack">{metrics.activeBuffs?.map((buff) => <div key={buff.id} className={buff.tone}><b>{buff.label}</b><span>{buff.remaining}s</span></div>)}{Boolean(metrics.drops) && <div className="drops"><b>场内掉落物</b><span>{metrics.drops}</span></div>}</div>
       <div className="combat-skill-tray" aria-label="主动技能状态">
