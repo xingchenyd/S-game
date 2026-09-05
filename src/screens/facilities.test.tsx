@@ -5,6 +5,7 @@ import TrainingScreen from './TrainingScreen'
 import MuseumScreen from './MuseumScreen'
 import { loginOrCreate } from '../store/profile'
 import { modeSimulations, playModes } from '../data/playModes'
+import { scoreTrainingRoom, trainingRoomPlans } from '../data/trainingRooms'
 import { collectibles } from '../data/content'
 
 beforeEach(() => {
@@ -26,23 +27,28 @@ describe('training stations', () => {
     expect(screen.getAllByAltText(/场景预览$/)).toHaveLength(11)
   })
 
-  it('preserves three-stage scoring and prevents changing an answered decision', () => {
-    const profile = loginOrCreate('训练验收')
-    const onChange = vi.fn()
-    const simulation = modeSimulations[0]
-    const mode = playModes.find((item) => item.id === simulation.modeId)!
-    render(<TrainingScreen profile={profile} onChange={onChange} />)
+  it('opens a controllable room instead of presenting a full-screen quiz', () => {
+    const mode = playModes[0]
+    render(<TrainingScreen profile={loginOrCreate('训练验收')} onChange={vi.fn()} />)
     fireEvent.click(screen.getByRole('button', { name: `开始${mode.shortName}训练` }))
-    for (const [index, round] of simulation.rounds.entries()) {
-      const best = screen.getByRole('button', { name: new RegExp(round.options[round.best].label) })
-      fireEvent.click(best)
-      expect((best as HTMLButtonElement).disabled).toBe(true)
-      fireEvent.click(screen.getByRole('button', { name: index === simulation.rounds.length - 1 ? '完成并复盘' : '进入下一阶段' }))
+    expect(screen.getByRole('application', { name: '使用方向键移动行动员并靠近目标互动' })).toBeTruthy()
+    expect(screen.getByRole('region', { name: `${trainingRoomPlans[mode.id][0].name}可操作训练房间` })).toBeTruthy()
+    expect(screen.getByRole('button', { name: '向上移动' })).toBeTruthy()
+    expect(screen.queryByRole('button', { name: new RegExp(modeSimulations[0].rounds[0].options[0].label) })).toBeNull()
+  })
+
+  it('defines three varied practical rooms per station and grades mistakes without timing', () => {
+    const mechanics = new Set<string>()
+    for (const mode of playModes) {
+      const rooms = trainingRoomPlans[mode.id]
+      expect(rooms).toHaveLength(3)
+      expect(rooms.filter((room) => room.mechanic !== 'terminal').length).toBeGreaterThanOrEqual(2)
+      rooms.forEach((room) => mechanics.add(room.mechanic))
     }
-    expect(onChange).toHaveBeenCalledTimes(1)
-    expect(onChange.mock.calls[0][0].modeMastery[mode.id]).toBe(100)
-    expect(onChange.mock.calls[0][0].points).toBe(profile.points + 100)
-    expect(screen.getByRole('heading', { name: `${mode.shortName} · 100分` })).toBeTruthy()
+    expect([...mechanics].sort()).toEqual(['escort', 'scan', 'sequence', 'sort', 'terminal'])
+    expect(scoreTrainingRoom(0)).toBe(100)
+    expect(scoreTrainingRoom(2)).toBe(80)
+    expect(scoreTrainingRoom(0, false)).toBe(80)
   })
 })
 

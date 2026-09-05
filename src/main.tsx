@@ -7,6 +7,7 @@ import './styles/ui-v5.css'
 import './styles/facility-ui.css'
 import './styles/story-reader.css'
 import './styles/readability-v6.css'
+import './styles/training-room.css'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
