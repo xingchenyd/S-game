@@ -30,6 +30,7 @@ interface Props {
 }
 
 const legacy = assetUrl('art/legacy')
+const GAME_CANVAS_FONT = '"Microsoft YaHei UI", "PingFang SC", "Noto Sans SC", Arial, sans-serif'
 type PickupKind = 'material' | 'shield' | 'heal' | 'attack' | 'speed' | 'energy' | 'prototype'
 
 class ActionScene extends Phaser.Scene {
@@ -168,7 +169,7 @@ class ActionScene extends Phaser.Scene {
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => window.removeEventListener('sgame-control', this.controlHandler))
     if (this.props.boss) this.spawnEnemy(true)
     else for (let i = 0; i < 3; i += 1) this.spawnEnemy(false)
-    const intro = this.add.text(480, 270, this.props.boss ? 'POLLUTION SHELL // BOSS ROOM' : 'RECYCLING ROOM // AREA SECURED', { fontFamily: 'monospace', fontSize: '17px', color: '#efffff', backgroundColor: '#07161de8', padding: { x: 18, y: 10 }, stroke: '#071116', strokeThickness: 2 }).setOrigin(.5).setDepth(20)
+    const intro = this.add.text(480, 270, this.props.boss ? 'POLLUTION SHELL // BOSS ROOM' : 'RECYCLING ROOM // AREA SECURED', { fontFamily: GAME_CANVAS_FONT, fontStyle: 'bold', fontSize: '17px', color: '#efffff', backgroundColor: '#07161de8', padding: { x: 18, y: 10 }, stroke: '#071116', strokeThickness: 2 }).setOrigin(.5).setDepth(20)
     this.tweens.add({ targets: intro, alpha: 0, y: 250, delay: 650, duration: 420, onComplete: () => intro.destroy() })
   }
 
@@ -256,7 +257,7 @@ class ActionScene extends Phaser.Scene {
     pickup.setCircle(Math.max(8, pickup.width * .26), pickup.width * .24, pickup.height * .24)
     const shadow = this.add.ellipse(pickup.x, pickup.y + data.size * .38, data.size * .8, 8, 0x000000, .45).setDepth(5)
     const beacon = this.add.circle(pickup.x, pickup.y, data.size * .72).setStrokeStyle(3, data.color, .8).setDepth(7)
-    const label = this.add.text(pickup.x, pickup.y - data.size * .75, data.label, { fontFamily: 'monospace', fontSize: kind === 'prototype' ? '11px' : '8px', color: '#ffffff', backgroundColor: '#071116dc', padding: { x: 5, y: 3 }, stroke: '#071116', strokeThickness: 2 }).setOrigin(.5, 1).setDepth(11)
+    const label = this.add.text(pickup.x, pickup.y - data.size * .75, data.label, { fontFamily: GAME_CANVAS_FONT, fontStyle: 'bold', fontSize: kind === 'prototype' ? '11px' : '8px', color: '#ffffff', backgroundColor: '#071116dc', padding: { x: 5, y: 3 }, stroke: '#071116', strokeThickness: 2 }).setOrigin(.5, 1).setDepth(11)
     pickup.setData('shadow', shadow).setData('beacon', beacon).setData('label', label)
     this.tweens.add({ targets: pickup, scaleX: pickup.scaleX * 1.1, scaleY: pickup.scaleY * 1.1, angle: kind === 'prototype' ? 6 : 3, duration: 520, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' })
     this.tweens.add({ targets: beacon, scale: 1.35, alpha: .12, duration: 760, yoyo: true, repeat: -1 })
@@ -283,7 +284,7 @@ class ActionScene extends Phaser.Scene {
   }
 
   private showPickupToast(message: string) {
-    const toast = this.add.text(480, 465, message, { fontFamily: 'monospace', fontSize: '12px', color: '#071116', backgroundColor: '#fff0a8', padding: { x: 10, y: 6 } }).setOrigin(.5).setDepth(20)
+    const toast = this.add.text(480, 465, message, { fontFamily: GAME_CANVAS_FONT, fontStyle: 'bold', fontSize: '12px', color: '#071116', backgroundColor: '#fff0a8', padding: { x: 10, y: 6 } }).setOrigin(.5).setDepth(20)
     this.tweens.add({ targets: toast, y: 444, alpha: 0, delay: 560, duration: 300, onComplete: () => toast.destroy() })
   }
 
@@ -422,7 +423,7 @@ class ActionScene extends Phaser.Scene {
       const bit = this.add.rectangle(enemy.x, enemy.y, 4, 4, this.props.adventure.wasteType === 'textile' ? 0xff78ad : 0x41e7ff).setDepth(7)
       this.tweens.add({ targets: bit, x: enemy.x + Phaser.Math.Between(-28, 28), y: enemy.y + Phaser.Math.Between(-28, 28), alpha: 0, duration: 220, onComplete: () => bit.destroy() })
     }
-    const number = this.add.text(enemy.x, enemy.y - enemy.displayHeight * .52, `${active ? '✦ ' : ''}${damage}`, { fontFamily: 'monospace', fontSize: active ? '15px' : '11px', color: active ? '#fff1a8' : '#d7fbff', stroke: '#071116', strokeThickness: 4 }).setOrigin(.5).setDepth(12)
+    const number = this.add.text(enemy.x, enemy.y - enemy.displayHeight * .52, `${active ? '✦ ' : ''}${damage}`, { fontFamily: GAME_CANVAS_FONT, fontStyle: 'bold', fontSize: active ? '15px' : '11px', color: active ? '#fff1a8' : '#d7fbff', stroke: '#071116', strokeThickness: 4 }).setOrigin(.5).setDepth(12)
     this.tweens.add({ targets: number, y: number.y - 24, alpha: 0, duration: active ? 520 : 380, onComplete: () => number.destroy() })
     if (this.props.builds.includes('pulse') && Math.random() < .18) enemy.setData('slowedUntil', this.time.now + 700)
     this.checkBossPhase(enemy, hp)
@@ -445,7 +446,7 @@ class ActionScene extends Phaser.Scene {
     const next = definition.phases?.[phase]
     if (!next || ratio > next.at) return
     enemy.setData('phase', phase + 1).setTint(0xff8b7f)
-    const banner = this.add.text(480, 112, `${next.name} · ${next.change}`, { fontFamily: 'monospace', fontSize: '14px', color: '#071419', backgroundColor: '#ffd65a', padding: { x: 12, y: 6 } }).setOrigin(.5).setDepth(12)
+    const banner = this.add.text(480, 112, `${next.name} · ${next.change}`, { fontFamily: GAME_CANVAS_FONT, fontStyle: 'bold', fontSize: '14px', color: '#071419', backgroundColor: '#ffd65a', padding: { x: 12, y: 6 } }).setOrigin(.5).setDepth(12)
     this.cameras.main.flash(180, 255, 111, 104)
     this.time.delayedCall(1200, () => this.tweens.add({ targets: banner, alpha: 0, duration: 260, onComplete: () => banner.destroy() }))
     for (let i = 0; i < phase + 2; i += 1) this.spawnRadialShot(enemy, (Math.PI * 2 / (phase + 2)) * i, 240 + phase * 40)

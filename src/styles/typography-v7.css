@@ -1,0 +1,109 @@
+/* Standard Chinese glyphs; game character comes from colour, outline and depth. */
+:root {
+  --display-font:"Microsoft YaHei UI","PingFang SC","Noto Sans SC","Source Han Sans SC","SimHei",system-ui,sans-serif;
+  --reading-font:"Microsoft YaHei UI","PingFang SC","Noto Sans SC","Source Han Sans SC",system-ui,sans-serif;
+  --number-font:Bahnschrift,"DIN Alternate","Arial Narrow",var(--display-font);
+  --type-outline:#02090d;
+  --type-cyan:#7df3ff;
+  --type-gold:#ffe07a;
+  --type-cream:#fff5dc;
+}
+
+html,body,button,input,select,textarea { font-family:var(--reading-font);font-style:normal;font-synthesis:none; }
+body { font-weight:650;letter-spacing:.01em; }
+button,input,select,textarea { font-weight:750; }
+p,li,label,small,em,u,figcaption { font-family:var(--reading-font); }
+
+/* Orthodox glyphs with a restrained game-title treatment. */
+h1,h2,h3,h4,
+.page-title h1,.facility-hero h1,.facility-section-heading h2,.exhibit-section-heading h2,
+.mode-heading h2,.mode-result h1,.training-room-brief h1,.room-terminal-overlay h2,
+.campaign-map-heading h2,.campaign-copy>b,.story-info>b,.theme-copy>b,
+.profile-grid h2,.settings-panel h2,.save-panel h2,.gear-card h3,
+.skill-node h3,.skill-branch h2,.tree-core b,.dialogue-speaker>span {
+  font-family:var(--display-font);font-style:normal;font-weight:900;letter-spacing:.035em;
+  -webkit-text-stroke:.35px var(--type-outline);paint-order:stroke fill;
+  text-shadow:0 2px 0 #061116,2px 4px 0 #02080b,0 0 16px #48dfee30;
+}
+
+.page-title h1,.facility-hero h1,.training-room-brief h1,.mode-result h1,
+.campaign-map-heading h2,.facility-section-heading h2,.exhibit-section-heading h2 {
+  color:var(--type-cream);text-shadow:0 2px 0 #184d58,0 5px 0 #02090d,0 0 22px #5eeaf344;
+}
+
+/* Main cover and transitions: no italic, skew or handwriting. */
+.title-lockup h1,.transition-title b {
+  font-family:var(--display-font);font-style:normal!important;font-weight:950;transform:none!important;
+  letter-spacing:.015em;color:#dffcff;-webkit-text-stroke:1px #031016;
+  text-shadow:0 3px 0 #16849a,0 7px 0 #02090c,3px 10px 12px #000b,0 0 28px #5bf0ff66;
+}
+.title-lockup h1 em { color:#ffe064;text-shadow:0 3px 0 #a55a16,0 7px 0 #02090c,0 0 24px #ffcb4770; }
+.transition-title b { color:#f7ffff; }
+
+/* Theater keeps an editorial mood without changing the basic character shapes. */
+.screen-theater { --story-brush:var(--display-font);--story-kai:var(--reading-font); }
+.screen-theater .theater-screen h1,.screen-theater .theater-screen h2,
+.screen-theater .theme-copy>b,.screen-theater .story-info>b,
+.story-reading-stage .dialogue-header small,
+.game-shell.screen-theater .story-reading-stage .dialogue-header h1,
+.story-reading-stage .dialogue-header>button,
+.story-reading-stage .dialogue-speaker>span,
+.story-scene-art figcaption>span,
+.story-reading-stage .story-complete h2,
+.story-reading-stage .dialogue-next {
+  font-family:var(--display-font);font-style:normal;font-weight:900;letter-spacing:.035em;
+}
+.game-shell.screen-theater .story-reading-stage .dialogue-header h1,
+.story-reading-stage .dialogue-speaker>span,.story-reading-stage .story-complete h2 {
+  color:#ffe4a1;-webkit-text-stroke:.35px #160e08;
+  text-shadow:0 2px 0 #563b1d,0 4px 0 #05090b,0 0 18px #f1bd5a38;
+}
+.screen-theater .theme-copy>em,.screen-theater .theater-screen p,
+.story-reading-stage .dialogue-copy>p,.story-reading-stage .dialogue-copy>em,
+.story-reading-stage .dialogue-choices button,.story-reading-stage .dialogue-speaker>button,
+.story-scene-art figcaption small,.story-reading-stage .story-complete p,
+.story-reading-stage .story-goals span,.story-reading-stage .story-complete button,
+.object-voice,.dialogue-copy>p {
+  font-family:var(--reading-font);font-style:normal;font-weight:650;letter-spacing:.025em;
+}
+
+/* Buttons and navigation use a compact raised-label treatment. */
+.primary-button,.secondary-button,.danger-button,.mission-entry,
+.facility-entry,.mode-card-actions button,.slot-tabs button,.gear-card>button,
+.dialogue-choices button,.dialogue-next,.training-room-footer>button,
+.room-terminal-overlay button,.world-interaction button,.dock span,.system-rail span {
+  font-family:var(--display-font);font-style:normal;font-weight:900;letter-spacing:.045em;
+  -webkit-text-stroke:.2px #02080b;text-shadow:0 2px 0 #0008;
+}
+.primary-button,.facility-entry,.mission-entry { text-shadow:0 1px 0 #ffffff55; }
+
+/* HUD and archive values share formal, tabular numerals. */
+.level-badge,.currency,.points-box b,.count-chip,.completion-ring b,
+.training-total>b,.mode-score,.mode-number,.result-grade,.profile-stat .stat-copy b,
+.hero-metrics strong,.stats-board b,.xp-block small,.mode-meter-board b,
+.training-room-brief aside b,.room-terminal-overlay button i,.campaign-order,
+.story-index,.dialogue-header>span,.top-rail .currency,.world-player-status b {
+  font-family:var(--number-font);font-style:normal;font-weight:900;font-variant-numeric:tabular-nums;
+  letter-spacing:.04em;text-shadow:0 2px 0 #000,0 0 12px currentColor;
+}
+
+/* Small labels become clearer while staying plain interface copy. */
+.eyebrow,.facility-kicker,.mode-heading small,.campaign-copy>small,
+.profile-stat .stat-copy small,.tree-core small,.skill-branch>header em,
+.training-room-brief>div>span,.room-terminal-overlay>section>span,
+.story-reading-stage .dialogue-header small {
+  font-family:var(--reading-font);font-style:normal;font-weight:900;letter-spacing:.1em;
+  text-shadow:0 2px 3px #000,0 0 10px currentColor;
+}
+
+/* Remaining labels must not inherit decorative deformation. */
+.campaign-kind,.story-index,.mode-number,.facility-sign b,.world-interaction b,
+.training-prop b,.training-bin b,.training-station b,.training-terminal b {
+  font-style:normal;transform:none;
+}
+
+@media(max-width:680px){
+  h1,h2,h3,.page-title h1,.facility-hero h1,.training-room-brief h1 { letter-spacing:.025em; }
+  .title-lockup h1,.transition-title b { letter-spacing:0;-webkit-text-stroke:.65px #031016; }
+  .dock span,.system-rail span { -webkit-text-stroke:0;letter-spacing:.02em; }
+}

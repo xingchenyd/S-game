@@ -118,7 +118,7 @@ h1, h2, h3, .story-info > b, .theme-copy > b { font-family: var(--display-font);
 
 /* Login text sits on an independent, layout-safe plate. */
 .title-kicker, .title-lockup p { width:max-content; max-width:100%; padding:7px 12px; border:1px solid #8ceaf03d; border-radius:11px; background:#031117d9; box-shadow:0 6px 18px #0007; }
-.title-lockup h1 { font-family:var(--display-font); font-style:italic; transform:skewX(-4deg); letter-spacing:-.07em; color:#f5ffff; text-shadow:3px 3px 0 #093a49,6px 6px 0 #02080b,0 0 28px #59e9f155; }
+.title-lockup h1 { font-family:var(--display-font); font-style:normal; transform:none; letter-spacing:.015em; color:#f5ffff; text-shadow:3px 3px 0 #093a49,6px 6px 0 #02080b,0 0 28px #59e9f155; }
 .title-lockup h1 em { color:#ffd56c; }
 .login-card { padding:22px; }
 .name-field { border:2px solid #5baab655; border-radius:12px; background:#020f15dc; }
@@ -131,7 +131,7 @@ h1, h2, h3, .story-info > b, .theme-copy > b { font-family: var(--display-font);
 .scene-transition > .transition-scan { position:absolute; inset:0; background:repeating-linear-gradient(0deg,transparent 0 8px,#c9ffff08 9px); clip-path:polygon(0 0,100% 0,86% 100%,14% 100%); animation:transition-scan .96s both; }
 .transition-title { position:relative; min-width:min(520px,88vw); padding:24px 34px 20px; display:grid; justify-items:center; gap:6px; border:1px solid #87ecf066; border-radius:22px; background:linear-gradient(145deg,#071a22ed,#020b10ed); box-shadow:inset 0 1px #fff2,0 24px 70px #000c; animation:transition-title .96s both; }
 .transition-title small { padding:4px 9px; border-radius:999px; background:#0b3941; color:#85f4f6; font-size:10px; letter-spacing:.18em; }
-.transition-title b { font-family:var(--display-font); font-style:italic; transform:skewX(-5deg); font-size:clamp(38px,7vw,78px); letter-spacing:-.08em; color:#fff; text-shadow:3px 3px 0 #137184,7px 7px 0 #02080b; }
+.transition-title b { font-family:var(--display-font); font-style:normal; transform:none; font-size:clamp(38px,7vw,78px); letter-spacing:.015em; color:#fff; text-shadow:3px 3px 0 #137184,7px 7px 0 #02080b; }
 .transition-title em { color:#ffd86b; font-style:normal; font-size:12px; letter-spacing:.2em; }
 .transition-title i { display:block; width:240px; height:5px; margin-top:7px; border-radius:5px; overflow:hidden; background:#18353c; box-shadow:none; }
 .transition-title i::after { content:""; display:block; width:100%; height:100%; background:linear-gradient(90deg,#48eaf7,#ffd35d); transform-origin:left; animation:transition-load .75s .08s both; }

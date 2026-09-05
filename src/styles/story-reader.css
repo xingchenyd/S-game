@@ -1,9 +1,5 @@
-@font-face { font-family:'SGame Story Brush'; src:url('/fonts/story-brush.woff2') format('woff2'); font-weight:400; font-style:normal; font-display:swap; }
-@font-face { font-family:'SGame Story Kai'; src:url('/fonts/story-kai.woff2') format('woff2'); font-weight:400 700; font-style:normal; font-display:swap; }
-
-/* Typography is local to the theater. Long dialogue uses a readable handwritten
-   face; display titles use genuine brush glyphs instead of simulated bold. */
-.screen-theater { --story-brush:'SGame Story Brush','KaiTi',serif; --story-kai:'SGame Story Kai','KaiTi','STKaiti',serif; }
+/* Typography is local to the theater, but uses the same orthodox sans glyphs. */
+.screen-theater { --story-brush:var(--display-font); --story-kai:var(--reading-font); }
 .screen-theater .theater-screen h1,.screen-theater .theater-screen h2,
 .screen-theater .theme-copy > b,.screen-theater .story-info > b { font-family:var(--story-brush); font-weight:400; letter-spacing:.04em; }
 .screen-theater .story-info > small,.screen-theater .story-info > em,

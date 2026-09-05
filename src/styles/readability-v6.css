@@ -1,9 +1,6 @@
-@font-face { font-family:'SGame UI Brush'; src:url('/fonts/story-brush.woff2') format('woff2'); font-weight:400; font-style:normal; font-display:swap; }
-@font-face { font-family:'SGame UI Kai'; src:url('/fonts/story-kai.woff2') format('woff2'); font-weight:400 700; font-style:normal; font-display:swap; }
-
-:root { --display-font:'SGame UI Brush','STKaiti','KaiTi','Microsoft YaHei UI',sans-serif; --reading-font:'SGame UI Kai','Microsoft YaHei UI','PingFang SC',sans-serif; --muted:#b8d3d7; }
+:root { --display-font:'Microsoft YaHei UI','PingFang SC','Noto Sans SC','Source Han Sans SC','SimHei',system-ui,sans-serif; --reading-font:'Microsoft YaHei UI','PingFang SC','Noto Sans SC','Source Han Sans SC',system-ui,sans-serif; --muted:#b8d3d7; }
 body,button,input,select,textarea { font-family:var(--reading-font); font-weight:650; }
-h1,h2,h3,.dock span,.primary-button,.secondary-button,.danger-button,.mission-entry { font-family:var(--display-font); font-weight:400; letter-spacing:.045em; }
+h1,h2,h3,.dock span,.primary-button,.secondary-button,.danger-button,.mission-entry { font-family:var(--display-font); font-weight:900; letter-spacing:.045em; }
 .page-title h1 { font-size:clamp(36px,4.4vw,58px); line-height:1.05; text-shadow:0 3px 0 #000,0 0 24px #41e7ff38; }
 .page-title p { max-width:820px;color:#d5ebee;font-size:15px;line-height:1.72; }
 .eyebrow { color:#74efff;font-size:13px;font-weight:900;text-shadow:0 2px 4px #000; }
