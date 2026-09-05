@@ -1,5 +1,6 @@
 import { ArrowLeft, Check, ChevronRight, RotateCcw } from 'lucide-react'
 import { useLayoutEffect, useMemo, useState, type CSSProperties } from 'react'
+import { trainingReward } from '../data/skills'
 import { modeSimulations, playModes } from '../data/playModes'
 import type { PlayerProfile, PlayModeDefinition } from '../types'
 import GameIcon, { type GameIconName } from '../components/GameIcon'
@@ -45,7 +46,7 @@ export default function TrainingScreen({ profile, onChange }: Props) {
       <div className="facility-hero-copy"><span className="facility-kicker">基地设施 / 情境演练中心</span><h1>循环训练场</h1><p>先在这里练习判断，再把经验带回城市。选择一个演练站，经历三个情境，观察你的决定如何改变安全与材料价值。</p><div className="facility-tags"><span>11 个演练站</span><span>3 阶段决策</span><span>可反复挑战</span></div><a className="facility-entry" href="#training-stations">选择演练站 <ChevronRight size={19} /></a></div>
       <div className="training-total"><GameIcon name="training" size={62} /><span>训练档案</span><b>{completed}<small> / {playModes.length}</small></b><span>已完成演练</span><div className="facility-meter"><i style={{ width: `${completed / playModes.length * 100}%` }} /></div></div>
     </header>
-    <div className="facility-section-heading" id="training-stations"><div><span>选择一项，开始练习</span><h2>今天，守护哪一环？</h2></div><p>先看现场，再作选择。结束后可查看判断依据与最高成绩。</p></div>
+    <div className="facility-section-heading" id="training-stations"><div><span>选择一项，开始练习</span><h2>今天，守护哪一环？</h2></div><p>先看现场，再作选择。每个演练站首次达到80分可获得2技能点，刷新纪录另有积分奖励。</p></div>
     <div className="mode-grid">{playModes.map((mode, index) => {
       const score = profile.modeMastery?.[mode.id] ?? 0
       return <article key={mode.id} className="mode-card illustrated-mode" style={visualStyle(mode.id)}>
@@ -97,7 +98,7 @@ function ModeRun({ mode, profile, onChange, onExit }: { mode: PlayModeDefinition
     if (round < simulation.rounds.length - 1) { setRound((value) => value + 1); setAnswer(null); return }
     const score = Math.round(40 + (correctChoices / simulation.rounds.length) * 60)
     const previous = profile.modeMastery?.[mode.id] ?? 0
-    onChange({ ...profile, points: profile.points + (score > previous ? Math.max(10, score - previous) : 5), modeMastery: { ...(profile.modeMastery ?? {}), [mode.id]: Math.max(previous, score) } })
+    onChange({ ...profile, points: profile.points + trainingReward(profile.unlockedSkills, score, previous), modeMastery: { ...(profile.modeMastery ?? {}), [mode.id]: Math.max(previous, score) } })
     setDone(true)
   }
   const restart = () => { setRound(0); setMeters(simulation.initial); setAnswer(null); setPrinciples([]); setCorrectChoices(0); setDone(false) }

@@ -6,6 +6,7 @@ import { getPlayMode, modeSimulations } from '../data/playModes'
 import type { BattleResult } from '../game/PhaserCombat'
 import ExplorationRoom from '../components/ExplorationRoom'
 import { isMissionUnlocked, shanghaiCampaign } from '../data/campaign'
+import { resolveSkillEffects } from '../data/skills'
 import { difficultyTuning, resolveCombatStats } from '../data/balance'
 import { startMusic } from '../store/audio'
 import type { AdventureDefinition, CampaignMission, Difficulty, PlayerProfile, RunMetrics } from '../types'
@@ -43,6 +44,7 @@ export default function AdventureScreen({ profile, onChange, onImmersive }: Prop
   const prototypeCollectibleId = getPrototypeCollectibleId(selected?.id ?? 'unknown')
   const combatStats = useMemo(() => resolveCombatStats(profile), [profile])
 
+  const skillEffects = resolveSkillEffects(profile.unlockedSkills)
   const musicVolume = profile.settings.musicVolume * profile.settings.masterVolume
   const begin = () => { startMusic('adventure', musicVolume); setPhase(selectedMission ? 'room' : 'combat'); setMetrics((m) => ({ ...m, stage: 1 })); onImmersive(true) }
   const battleDone = (result: BattleResult) => {
@@ -57,7 +59,7 @@ export default function AdventureScreen({ profile, onChange, onImmersive }: Prop
     setAnswer(index); setCorrect(isCorrect)
     if (isCorrect) setCorrectSystems((value) => value + 1)
     const modeCount = Math.max(1, selected?.modes?.length ?? 1)
-    setMetrics((m) => ({ ...m, pollution: Math.max(0, m.pollution - (isCorrect ? 10 : 1)), accuracy: Math.round(((correctSystems + (isCorrect ? 1 : 0)) / (systemIndex + 1)) * 100), value: m.value + (isCorrect ? 22 : 5), stage: 2 + (systemIndex + 1) / modeCount }))
+    setMetrics((m) => ({ ...m, pollution: Math.max(0, m.pollution - (isCorrect ? 10 + skillEffects.decisionPollution : 1)), accuracy: Math.round(((correctSystems + (isCorrect ? 1 : 0)) / (systemIndex + 1)) * 100), value: m.value + (isCorrect ? 22 + skillEffects.decisionValue : 5), stage: 2 + (systemIndex + 1) / modeCount }))
   }
   const advanceSystem = () => {
     const finalSystem = systemIndex >= (selected?.modes?.length ?? 1) - 1
@@ -68,7 +70,8 @@ export default function AdventureScreen({ profile, onChange, onImmersive }: Prop
   const finish = (result: BattleResult) => {
     if (!selected) return
     const multiplier = difficultyTuning[difficulty].reward
-    const points = Math.round((result.value + correctSystems * 18 + (correctSystems === 0 ? 8 : 0)) * multiplier)
+    const finalPollution = Math.max(0, metrics.pollution - 18)
+    const points = Math.round((result.value + correctSystems * 18 + (correctSystems === 0 ? 8 : 0)) * multiplier) + (finalPollution <= 25 ? skillEffects.cleanFinishBonus : 0)
     const prototypeId = getPrototypeCollectibleId(selected.id)
     const firstMissionClear = Boolean(selectedMission && !profile.campaignCompleted.includes(selectedMission.id))
     const skillReward = firstMissionClear && ['sh-02', 'sh-04', 'sh-05'].includes(selectedMission?.id ?? '') ? 1 : firstMissionClear && selectedMission?.id === 'sh-08' ? 2 : 0
@@ -91,7 +94,7 @@ export default function AdventureScreen({ profile, onChange, onImmersive }: Prop
         enemiesPurified: profile.stats.enemiesPurified + purified + result.purified,
         classificationTotal: profile.stats.classificationTotal + Math.max(1, selected.modes?.length ?? 1),
         classificationCorrect: profile.stats.classificationCorrect + correctSystems,
-        bestPollution: Math.min(profile.stats.bestPollution, metrics.pollution),
+        bestPollution: Math.min(profile.stats.bestPollution, finalPollution),
         valuePreserved: profile.stats.valuePreserved + points,
       },
     }
@@ -160,7 +163,7 @@ export default function AdventureScreen({ profile, onChange, onImmersive }: Prop
         <div className={(metrics.skillCooldowns?.dash ?? 0) <= 0 ? 'ready' : ''}><GameIcon name="dash" size={42} /><kbd>空格</kbd><span><b>无敌冲刺</b><small>{(metrics.skillCooldowns?.dash ?? 0) <= 0 ? '可释放' : `${metrics.skillCooldowns?.dash?.toFixed(1)}s`}</small></span><i><em style={{ width: `${Math.max(0, 100 - (metrics.skillCooldowns?.dash ?? 0) / 1.8 * 100)}%` }} /></i></div>
         <div className={metrics.finisher >= 100 ? 'ready ultimate' : 'ultimate'}><GameIcon name="ultimate" size={42} /><kbd>R</kbd><span><b>原型终结</b><small>{metrics.finisher}%</small></span><i><em style={{ width: `${metrics.finisher}%` }} /></i></div>
       </div>
-      <Suspense fallback={<div className="loading-screen"><span /><b>正在装配精细2D战斗场景…</b></div>}><PhaserCombat adventure={selected} difficulty={difficulty} boss={phase === 'boss'} builds={builds} weaponId={profile.equipped.weapon} combatStats={combatStats} screenShake={profile.settings.screenShake} initialPollution={metrics.pollution} initialValue={metrics.value} finisherCharge={metrics.finisher} pulseCooldown={metrics.skillCooldowns?.pulse} dashCooldown={metrics.skillCooldowns?.dash} onHud={(value) => setMetrics((m) => ({ ...m, ...value }))} onComplete={battleDone} onDefeat={() => { setPhase('defeat'); onImmersive(false) }} /></Suspense>
+      <Suspense fallback={<div className="loading-screen"><span /><b>正在装配精细2D战斗场景…</b></div>}><PhaserCombat adventure={selected} difficulty={difficulty} boss={phase === 'boss'} builds={builds} weaponId={profile.equipped.weapon} combatStats={combatStats} skillEffects={skillEffects} screenShake={profile.settings.screenShake} initialPollution={metrics.pollution} initialValue={metrics.value} finisherCharge={metrics.finisher} pulseCooldown={metrics.skillCooldowns?.pulse} dashCooldown={metrics.skillCooldowns?.dash} onHud={(value) => setMetrics((m) => ({ ...m, ...value }))} onComplete={battleDone} onDefeat={() => { setPhase('defeat'); onImmersive(false) }} /></Suspense>
     </>}
 
     {phase === 'classify' && <section className="decision-overlay">

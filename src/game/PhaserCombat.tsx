@@ -1,6 +1,6 @@
 import Phaser from 'phaser'
 import { useEffect, useRef } from 'react'
-import type { AdventureDefinition, CombatStats, Difficulty, RunMetrics } from '../types'
+import type { AdventureDefinition, CombatStats, Difficulty, RunMetrics, SkillEffects } from '../types'
 import { playUiSound } from '../store/audio'
 import { bosses, elitesFor, enemiesFor, type EnemyDefinition } from '../data/enemies'
 import { difficultyTuning } from '../data/balance'
@@ -16,6 +16,7 @@ interface Props {
   builds: string[]
   weaponId: string
   combatStats: CombatStats
+  skillEffects: SkillEffects
   screenShake: boolean
   initialPollution: number
   initialValue: number
@@ -43,6 +44,7 @@ class ActionScene extends Phaser.Scene {
   private hp = 100
   private maxShield = 0
   private shield = 0
+  private secondWindUsed = false
   private kills = 0
   private targetKills = 12
   private value = 0
@@ -240,10 +242,10 @@ class ActionScene extends Phaser.Scene {
     const spec: Record<PickupKind, { texture: string; label: string; color: number; size: number }> = {
       material: { texture: 'spark', label: '可用材料', color: 0xffd65a, size: 22 },
       shield: { texture: 'shield', label: '+20 护盾', color: 0x62dcff, size: 28 },
-      heal: { texture: 'pickup-heart', label: '修复 10% 生命', color: 0xff6d78, size: 28 },
+      heal: { texture: 'pickup-heart', label: `修复 ${Math.round((.1 + this.props.skillEffects.healingBonus) * 100)}% 生命`, color: 0xff6d78, size: 28 },
       attack: { texture: 'pickup-power', label: '超载攻击 · 8秒', color: 0xffb24f, size: 30 },
       speed: { texture: 'pickup-dash', label: '轻量移动 · 8秒', color: 0x7ef2b0, size: 30 },
-      energy: { texture: 'pickup-energy', label: '终结能量 +18', color: 0xb995ff, size: 26 },
+      energy: { texture: 'pickup-energy', label: `终结能量 +${18 + this.props.skillEffects.energyBonus}`, color: 0xb995ff, size: 26 },
       prototype: { texture: 'core', label: this.props.adventure.prototype, color: 0xffe56d, size: 42 },
     }
     const data = spec[kind]
@@ -264,10 +266,10 @@ class ActionScene extends Phaser.Scene {
     let message = ''
     if (kind === 'material') { this.value += Math.round(4 * this.props.combatStats.valueGain); message = '可用材料 +4' }
     if (kind === 'shield') { this.maxShield = Math.max(this.maxShield, this.shield + 20); this.shield += 20; message = '循环护盾 +20' }
-    if (kind === 'heal') { const restored = Math.ceil(this.maxHp * .1); this.hp = Math.min(this.maxHp, this.hp + restored); message = `生命修复 +${restored}` }
+    if (kind === 'heal') { const restored = Math.ceil(this.maxHp * (.1 + this.props.skillEffects.healingBonus)); this.hp = Math.min(this.maxHp, this.hp + restored); message = `生命修复 +${restored}` }
     if (kind === 'attack') { this.attackBoostUntil = this.time.now + 8000; message = '超载攻击已启动 · 8秒' }
     if (kind === 'speed') { this.speedBoostUntil = this.time.now + 8000; message = '轻量移动已启动 · 8秒' }
-    if (kind === 'energy') { this.finisherCharge = Math.min(100, this.finisherCharge + 18); message = '终结能量 +18' }
+    if (kind === 'energy') { this.finisherCharge = Math.min(100, this.finisherCharge + 18 + this.props.skillEffects.energyBonus); message = `终结能量 +${18 + this.props.skillEffects.energyBonus}` }
     if (kind === 'prototype') { message = '稳定原型已回收'; this.awaitingPrototype = false; this.ended = true; this.time.delayedCall(900, () => this.props.onComplete({ purified: this.kills, damageTaken: this.damageTaken, value: this.value })) }
     ;(pickup.getData('shadow') as Phaser.GameObjects.Ellipse | undefined)?.destroy()
     ;(pickup.getData('beacon') as Phaser.GameObjects.Arc | undefined)?.destroy()
@@ -298,7 +300,7 @@ class ActionScene extends Phaser.Scene {
       if (!pickup.active) return
       const distance = Phaser.Math.Distance.Between(pickup.x, pickup.y, this.hero.x, this.hero.y)
       const kind = pickup.getData('kind') as PickupKind
-      const attraction = kind === 'prototype' ? 260 : this.props.builds.includes('magnet') ? 165 : 72
+      const attraction = (kind === 'prototype' ? 260 : this.props.builds.includes('magnet') ? 165 : 72) * this.props.combatStats.aimAssist
       if (distance < attraction) this.physics.moveToObject(pickup, this.hero, kind === 'prototype' ? 250 : 180)
       else pickup.setVelocity(0)
       ;(pickup.getData('shadow') as Phaser.GameObjects.Ellipse | undefined)?.setPosition(pickup.x, pickup.y + pickup.displayHeight * .38)
@@ -445,6 +447,7 @@ class ActionScene extends Phaser.Scene {
     }
     playUiSound(isBoss ? 'success' : 'hover', isBoss ? .8 : .28)
     this.kills += 1
+    if (!isBoss) this.hp = Math.min(this.maxHp, this.hp + this.props.skillEffects.killHeal)
     this.value += Math.round((isBoss ? 100 : 8) * this.props.combatStats.valueGain)
     this.pollution = Math.max(0, this.pollution - (isBoss ? 30 : 2.5))
     if (this.props.builds.includes('magnet')) this.hp = Math.min(this.maxHp, this.hp + 2)
@@ -469,6 +472,13 @@ class ActionScene extends Phaser.Scene {
     const healthDamage = protectedDamage - absorbed
     this.hp -= healthDamage
     this.damageTaken += healthDamage
+    if (!this.secondWindUsed && this.props.skillEffects.secondWindShield > 0 && this.hp > 0 && this.hp <= this.maxHp * .3) {
+      this.secondWindUsed = true
+      this.shield += this.props.skillEffects.secondWindShield
+      this.maxShield = Math.max(this.maxShield, this.shield)
+      const notice = this.add.text(this.hero.x, this.hero.y - 45, '二次整备 · 护盾 +30', { fontSize: '14px', color: '#a4f5ff', backgroundColor: '#082c35', padding: { x: 8, y: 5 } }).setOrigin(.5).setDepth(20)
+      this.tweens.add({ targets: notice, y: notice.y - 25, alpha: 0, delay: 600, duration: 700, onComplete: () => notice.destroy() })
+    }
     playUiSound('danger', .35)
     const angle = Phaser.Math.Angle.Between(sourceX, sourceY, this.hero.x, this.hero.y)
     this.hero.setVelocity(Math.cos(angle) * 360, Math.sin(angle) * 360).setTint(0xff766e)
@@ -529,11 +539,11 @@ class ActionScene extends Phaser.Scene {
     this.pulseReadyAt = this.time.now + 6500 / this.props.combatStats.cooldownRate
     playUiSound('success', .45)
     const wave = this.add.circle(this.hero.x, this.hero.y, 22, 0x41e7ff, .15).setStrokeStyle(6, 0x9ff7ff, .9).setDepth(7)
-    this.tweens.add({ targets: wave, scale: 7, alpha: 0, duration: 480, onComplete: () => wave.destroy() })
+    this.tweens.add({ targets: wave, scale: (220 + this.props.skillEffects.pulseRadius) / 22, alpha: 0, duration: 480, onComplete: () => wave.destroy() })
     this.enemies.getChildren().forEach((item) => {
       const enemy = item as Phaser.Physics.Arcade.Sprite
       const toEnemy = new Phaser.Math.Vector2(enemy.x - this.hero.x, enemy.y - this.hero.y).normalize()
-      if (Phaser.Math.Distance.Between(this.hero.x, this.hero.y, enemy.x, enemy.y) < 220 && this.lastDirection.dot(toEnemy) > .15) {
+      if (Phaser.Math.Distance.Between(this.hero.x, this.hero.y, enemy.x, enemy.y) < 220 + this.props.skillEffects.pulseRadius && this.lastDirection.dot(toEnemy) > .15) {
         enemy.setData('slowedUntil', this.time.now + 900)
         this.damageEnemy(enemy, Math.round(24 * this.attackMultiplier), true)
       }
@@ -543,6 +553,7 @@ class ActionScene extends Phaser.Scene {
   private dash() {
     if (this.time.now < this.dashReadyAt || this.ended) return
     this.dashReadyAt = this.time.now + 1800 / this.props.combatStats.cooldownRate
+    this.shield = Math.min(this.maxShield, this.shield + this.props.skillEffects.dashShield)
     playUiSound('hover', .25)
     this.dashUntil = this.time.now + 190
     this.invulnerableUntil = this.time.now + (this.props.builds.includes('barrier') ? 650 : 260)

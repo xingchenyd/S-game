@@ -1,5 +1,6 @@
 import { ArrowLeft, BookOpen, Check, ChevronRight, Clock3, ExternalLink, MapPin, Pause, Play, RotateCcw, Search, SlidersHorizontal, Volume2, VolumeX } from 'lucide-react'
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { firstStoryReward, resolveSkillEffects } from '../data/skills'
 import { knowledgeSources, stories } from '../data/content'
 import { speakChinese, stopSpeech } from '../store/audio'
 import type { PlayerProfile, StoryDefinition, WasteType } from '../types'
@@ -10,8 +11,8 @@ const typeNames: Record<WasteType, string> = { electronic: '电子物', plastic:
 type StoryTheme = StoryDefinition['theme']
 const themeMeta: { id: StoryTheme; name: string; kicker: string; description: string; cover: string; accent: string }[] = [
   { id: 'shanghai', name: '上海 · 城市材料环线', kicker: '首发主题 / 40篇', description: '从写字楼、社区、校园、河岸和展会出发，理解减量、维修、分类与真实流转。', cover: assetUrl('art/covers/core-worlds.png'), accent: '#45e7f1' },
-  { id: 'dujiangyan', name: '都江堰 · 与水协同', kicker: '水利主题 / 3篇', description: '不把自然当敌人：观察分水、排沙、引水与持续维护如何共同组成活态系统。', cover: assetUrl('art/theater/themes/dujiangyan.webp'), accent: '#73e6a1' },
-  { id: 'heidushan', name: '黑独山 · 无痕边界', kicker: '地貌主题 / 3篇', description: '在脆弱地貌中学习克制：不越线、不取走、不让公益行动制造第二次打扰。', cover: assetUrl('art/theater/themes/heidushan.webp'), accent: '#b8c8dc' },
+  { id: 'dujiangyan', name: '都江堰 · 与水协同', kicker: '水利主题 / 6篇', description: '不把自然当敌人：观察分水、排沙、引水与持续维护如何共同组成活态系统。', cover: assetUrl('art/theater/themes/dujiangyan.webp'), accent: '#73e6a1' },
+  { id: 'heidushan', name: '黑独山 · 无痕边界', kicker: '地貌主题 / 6篇', description: '在脆弱地貌中学习克制：不越线、不取走、不让公益行动制造第二次打扰。', cover: assetUrl('art/theater/themes/heidushan.webp'), accent: '#b8c8dc' },
 ]
 
 export default function TheaterScreen({ profile, onChange, onImmersive }: Props) {
@@ -37,7 +38,7 @@ export default function TheaterScreen({ profile, onChange, onImmersive }: Props)
     if (reply) { setReply(null); setBeat((value) => value + 1); return }
     if (beat >= story.beats.length - 1) {
       setFinished(true)
-      if (!profile.storiesCompleted.includes(story.id)) onChange({ ...profile, storiesCompleted: [...profile.storiesCompleted, story.id], points: profile.points + 30, stats: { ...profile.stats, storiesRead: profile.stats.storiesRead + 1 } })
+      if (!profile.storiesCompleted.includes(story.id)) onChange({ ...profile, storiesCompleted: [...profile.storiesCompleted, story.id], points: profile.points + firstStoryReward(profile.unlockedSkills), stats: { ...profile.stats, storiesRead: profile.stats.storiesRead + 1 } })
     } else setBeat((value) => value + 1)
   }
 
@@ -54,7 +55,7 @@ export default function TheaterScreen({ profile, onChange, onImmersive }: Props)
   useEffect(() => stopSpeech, [])
 
   if (!story && !theme) return <div className="theater-screen theater-theme-screen screen-enter">
-    <header className="page-title"><div><span className="eyebrow">CIRCULAR THEATER / 3 REGIONAL ARCHIVES</span><h1>循环剧场</h1><p>先选择一个区域主题，再进入章节库。46个故事均约2–3分钟，包含互动选择、学习目标和资料来源；地点与知识框架真实，人物与事件为教育性虚构。</p></div><div className="points-box">总收录进度<b>{profile.storiesCompleted.length} / {stories.length}</b></div></header>
+    <header className="page-title"><div><span className="eyebrow">CIRCULAR THEATER / 3 REGIONAL ARCHIVES</span><h1>循环剧场</h1><p>先选择一个区域主题，再进入章节库。{stories.length}个故事，每篇约2–3分钟，包含互动选择、学习目标和资料来源；地点与知识框架真实，人物与事件为教育性虚构。</p></div><div className="points-box">总收录进度<b>{profile.storiesCompleted.length} / {stories.length}</b></div></header>
     <div className="theme-library">{themeMeta.map((item) => {
       const items = stories.filter((storyItem) => storyItem.theme === item.id)
       const completed = items.filter((storyItem) => profile.storiesCompleted.includes(storyItem.id)).length
@@ -88,10 +89,10 @@ export default function TheaterScreen({ profile, onChange, onImmersive }: Props)
     <div className="dialogue-progress" role="progressbar" aria-label="故事阅读进度" aria-valuemin={0} aria-valuemax={story.beats.length} aria-valuenow={beat + 1}><span style={{ width: `${(beat + 1) / story.beats.length * 100}%` }} /></div>
     <div className="story-reading-layout">
     {!finished ? <section className="dialogue-box" aria-label="剧情对白">
-      <div ref={narrativeRef} className="dialogue-copy"><div className="dialogue-speaker">{current.portrait && !reply && <div className="dialogue-portrait"><img src={current.portrait} alt={`${current.speaker}头像`} /></div>}<span>{reply ? '回应' : current.speaker}</span><button onClick={speak} aria-label={speaking ? '停止语音' : '播放本句语音'}>{speaking ? <Pause /> : <Volume2 />}{speaking ? '停止' : '语音预览'}</button></div><p>{reply ? reply.text : current.text}</p>{reply?.insight && <em>行动笔记 · {reply.insight}</em>}
+      <div ref={narrativeRef} className="dialogue-copy">{resolveSkillEffects(profile.unlockedSkills).readingHint > 0 && <details className="reading-skill-hint"><summary>先听完 · 观察手记</summary><ul>{story.learningGoals.map((goal) => <li key={goal}>{goal}</li>)}</ul></details>}<div className="dialogue-speaker">{current.portrait && !reply && <div className="dialogue-portrait"><img src={current.portrait} alt={`${current.speaker}头像`} /></div>}<span>{reply ? '回应' : current.speaker}</span><button onClick={speak} aria-label={speaking ? '停止语音' : '播放本句语音'}>{speaking ? <Pause /> : <Volume2 />}{speaking ? '停止' : '语音预览'}</button></div><p>{reply ? reply.text : current.text}</p>{reply?.insight && <em>行动笔记 · {reply.insight}</em>}
         {!reply && current.choices ? <div className="dialogue-choices">{current.choices.map((choice) => <button key={choice.text} onClick={() => { stopSpeech(); setSpeaking(false); setReply({ text: choice.reply, insight: choice.insight }) }}>{choice.text}<ChevronRight /></button>)}</div> : <button className="dialogue-next" onClick={next}>{reply || beat < story.beats.length - 1 ? '继续' : '完成故事'} <ChevronRight /></button>}
       </div>
-    </section> : <section className="story-complete pixel-panel"><BookOpen /><span className="eyebrow">STORY COMPLETE</span><h2>故事已收录</h2><p>你完成了《{story.title}》。首次收录可获得30行动积分。以下学习目标会在材料护照与行动关卡中再次出现。</p><div className="story-goals">{story.learningGoals.map((goal) => <span key={goal}><Check />{goal}</span>)}</div><div className="story-source-stamp"><b>{story.reviewStatus}</b><span>{storySources.map((source) => source.publisher).join(' · ')}</span></div><div><button className="secondary-button" onClick={() => { setBeat(0); setFinished(false) }}><RotateCcw /> 再读一次</button><button className="primary-button" onClick={() => setStory(null)}>返回剧场</button></div></section>}
+    </section> : <section className="story-complete pixel-panel"><BookOpen /><span className="eyebrow">STORY COMPLETE</span><h2>故事已收录</h2><p>你完成了《{story.title}》。首次收录可获得{firstStoryReward(profile.unlockedSkills)}行动积分与1技能点，重读不重复领取。以下学习目标会在材料护照与行动关卡中再次出现。</p><div className="story-goals">{story.learningGoals.map((goal) => <span key={goal}><Check />{goal}</span>)}</div><div className="story-source-stamp"><b>{story.reviewStatus}</b><span>{storySources.map((source) => source.publisher).join(' · ')}</span></div><div><button className="secondary-button" onClick={() => { setBeat(0); setFinished(false) }}><RotateCcw /> 再读一次</button><button className="primary-button" onClick={() => setStory(null)}>返回剧场</button></div></section>}
     <figure className="story-scene-art"><img src={story.cover} alt={`${story.location} · ${story.title}场景插画`} /><figcaption><span>{story.location}</span><small>场景插画 · 人物与事件为教育性虚构</small></figcaption></figure>
     </div>
   </div>

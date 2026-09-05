@@ -23,4 +23,16 @@ describe('local username saves', () => {
     logout()
     expect(loadActiveProfile()).toBeNull()
   })
+
+  it('grants story and mastery skill points once and unlocks story exhibits', () => {
+    const created = loginOrCreate('成长测试')
+    const afterStory = saveProfile({ ...created, storiesCompleted: ['e04-earphone-knot'] })
+    expect(afterStory.skillPoints).toBe(3)
+    expect(afterStory.collectibles).toContain('earphone-module')
+    const repeated = saveProfile(afterStory)
+    expect(repeated.skillPoints).toBe(3)
+    const afterMastery = saveProfile({ ...repeated, modeMastery: { 'sorting-line': 80 } })
+    expect(afterMastery.skillPoints).toBe(5)
+    expect(saveProfile(afterMastery).skillPoints).toBe(5)
+  })
 })

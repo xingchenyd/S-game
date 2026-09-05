@@ -1,4 +1,5 @@
 import type { PlayerProfile, Settings } from '../types'
+import { collectibles } from '../data/content'
 
 const USERS_KEY = 'sgame.users.v1'
 const ACTIVE_KEY = 'sgame.active-user.v1'
@@ -31,6 +32,7 @@ const defaultProfile = (username: string): PlayerProfile => ({
   currentMission: 'sh-01',
   skillPoints: 2,
   unlockedSkills: [],
+  growthRewards: [],
   modeMastery: {},
   equipmentOwned: ['wrench-basic', 'helmet-basic', 'armor-basic', 'boots-basic'],
   equipped: { weapon: 'wrench-basic', helmet: 'helmet-basic', armor: 'armor-basic', boots: 'boots-basic' },
@@ -47,6 +49,22 @@ const defaultProfile = (username: string): PlayerProfile => ({
   },
 })
 
+export const reconcileProgression = (profile: PlayerProfile): PlayerProfile => {
+  const granted = new Set(profile.growthRewards ?? [])
+  let skillPoints = profile.skillPoints
+  for (const storyId of profile.storiesCompleted) {
+    const rewardId = `story:${storyId}`
+    if (!granted.has(rewardId)) { granted.add(rewardId); skillPoints += 1 }
+  }
+  for (const [modeId, score] of Object.entries(profile.modeMastery ?? {})) {
+    const rewardId = `mastery:${modeId}`
+    if ((score ?? 0) >= 80 && !granted.has(rewardId)) { granted.add(rewardId); skillPoints += 2 }
+  }
+  const storyIds = new Set(profile.storiesCompleted)
+  const storyCollectibles = collectibles.filter((item) => item.unlockStory && storyIds.has(item.unlockStory)).map((item) => item.id)
+  return { ...profile, skillPoints, growthRewards: [...granted], collectibles: [...new Set([...profile.collectibles, ...storyCollectibles])] }
+}
+
 const parseUsers = (): Record<string, PlayerProfile> => {
   try {
     const users = JSON.parse(localStorage.getItem(USERS_KEY) || '{}') as Record<string, PlayerProfile>
@@ -56,6 +74,7 @@ const parseUsers = (): Record<string, PlayerProfile> => {
       profile.currentMission ??= 'sh-01'
       profile.skillPoints ??= 2
       profile.unlockedSkills ??= []
+      profile.growthRewards ??= []
       profile.settings.voiceVolume ??= .85
       profile.settings.voicePreview ??= false
     }
@@ -72,14 +91,15 @@ export const getActiveUsername = () => localStorage.getItem(ACTIVE_KEY)
 export const loadActiveProfile = (): PlayerProfile | null => {
   const active = getActiveUsername()
   if (!active) return null
-  return parseUsers()[active] ?? null
+  const profile = parseUsers()[active]
+  return profile ? reconcileProgression(profile) : null
 }
 
 export const loginOrCreate = (rawUsername: string): PlayerProfile => {
   const username = rawUsername.trim().replace(/\s+/g, ' ').slice(0, 12)
   if (!username) throw new Error('请输入用户名')
   const users = parseUsers()
-  const profile = users[username] ?? defaultProfile(username)
+  const profile = reconcileProgression(users[username] ?? defaultProfile(username))
   profile.lastPlayedAt = new Date().toISOString()
   users[username] = profile
   localStorage.setItem(USERS_KEY, JSON.stringify(users))
@@ -88,7 +108,7 @@ export const loginOrCreate = (rawUsername: string): PlayerProfile => {
 }
 
 export const saveProfile = (profile: PlayerProfile): PlayerProfile => {
-  const next = { ...profile, lastPlayedAt: new Date().toISOString() }
+  const next = reconcileProgression({ ...profile, lastPlayedAt: new Date().toISOString() })
   const users = parseUsers()
   users[next.username] = next
   localStorage.setItem(USERS_KEY, JSON.stringify(users))

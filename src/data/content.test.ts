@@ -3,7 +3,7 @@ import { adventures, collectibles, equipment, stories } from './content'
 import { modeSimulations, playModes } from './playModes'
 import { baseEnemies, bosses, eliteEnemies } from './enemies'
 import { shanghaiCampaign } from './campaign'
-import { skillNodes } from './skills'
+import { resolveSkillEffects, skillNodes } from './skills'
 import { difficultyTuning, resolveCombatStats } from './balance'
 
 describe('game content integrity', () => {
@@ -42,7 +42,10 @@ describe('game content integrity', () => {
   })
 
   it('keeps theater stories substantial and interactive', () => {
-    expect(stories).toHaveLength(46)
+    expect(stories).toHaveLength(52)
+    expect(stories.filter((story) => story.theme === 'shanghai')).toHaveLength(40)
+    expect(stories.filter((story) => story.theme === 'dujiangyan')).toHaveLength(6)
+    expect(stories.filter((story) => story.theme === 'heidushan')).toHaveLength(6)
     expect(new Set(stories.map((story) => story.theme))).toEqual(new Set(['shanghai', 'dujiangyan', 'heidushan']))
     for (const story of stories) {
       expect(story.beats.length).toBeGreaterThanOrEqual(8)
@@ -77,9 +80,32 @@ describe('game content integrity', () => {
   })
 
   it('keeps permanent growth horizontal as well as vertical', () => {
-    expect(skillNodes).toHaveLength(9)
-    for (const branch of ['行动', '系统', '共情']) expect(skillNodes.filter((skill) => skill.branch === branch)).toHaveLength(3)
-    expect(skillNodes.filter((skill) => skill.routeAbility).length).toBeGreaterThanOrEqual(6)
+    expect(skillNodes).toHaveLength(24)
+    const ids = new Set(skillNodes.map((skill) => skill.id))
+    for (const branch of ['行动', '系统', '共情']) {
+      const branchSkills = skillNodes.filter((skill) => skill.branch === branch)
+      expect(branchSkills).toHaveLength(8)
+      expect(branchSkills.map((skill) => skill.tier)).toEqual([1, 2, 3, 4, 5, 6, 7, 8])
+      expect(branchSkills.reduce((sum, skill) => sum + skill.cost, 0)).toBe(27)
+    }
+    for (const skill of skillNodes) expect(skill.requires.every((required) => ids.has(required))).toBe(true)
+    const fullEffects = resolveSkillEffects(skillNodes.map((skill) => skill.id))
+    expect(fullEffects.secondWindShield).toBe(30)
+    expect(fullEffects.decisionPollution).toBe(7)
+    expect(fullEffects.storyBonus).toBe(30)
+    expect(fullEffects.trainingBonus).toBe(10)
+  })
+
+  it('adds four chapter-linked exhibits to every material room', () => {
+    const chapterLinked = collectibles.filter((item) => item.unlockStory)
+    expect(chapterLinked).toHaveLength(16)
+    for (const type of ['electronic', 'plastic', 'paper', 'textile']) {
+      expect(chapterLinked.filter((item) => item.type === type)).toHaveLength(4)
+    }
+    for (const item of chapterLinked) {
+      expect(stories.some((story) => story.id === item.unlockStory)).toBe(true)
+      expect(item.unlockHint?.length).toBeGreaterThan(8)
+    }
   })
 
   it('applies equipment stats to combat and keeps rarity budgets coherent', () => {

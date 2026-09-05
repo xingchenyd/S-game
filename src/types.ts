@@ -48,6 +48,7 @@ export interface PlayerProfile {
   currentMission: string
   skillPoints: number
   unlockedSkills: string[]
+  growthRewards?: string[]
   modeMastery: Partial<Record<PlayModeId, number>>
   equipmentOwned: string[]
   equipped: EquippedItems
@@ -124,6 +125,22 @@ export interface SkillNode {
   requires: string[]
   modifiers?: Partial<CombatStats>
   routeAbility?: string
+  perks?: Partial<SkillEffects>
+}
+
+export interface SkillEffects {
+  secondWindShield: number
+  pulseRadius: number
+  healingBonus: number
+  energyBonus: number
+  dashShield: number
+  killHeal: number
+  decisionPollution: number
+  decisionValue: number
+  storyBonus: number
+  trainingBonus: number
+  cleanFinishBonus: number
+  readingHint: number
 }
 
 export type CampaignNodeKind = 'story' | 'combat' | 'system' | 'explore' | 'rest' | 'elite' | 'boss'
@@ -156,6 +173,8 @@ export interface Collectible {
   before: string
   action: string
   after: string
+  unlockStory?: string
+  unlockHint?: string
 }
 
 export interface StoryChoice {

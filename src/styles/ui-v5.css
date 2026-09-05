@@ -227,6 +227,13 @@ h1, h2, h3, .story-info > b, .theme-copy > b { font-family: var(--display-font);
 .ability-tree .skill-node > button { width:66px;height:66px;border-radius:50%;border-width:3px;box-shadow:0 0 0 6px #071d22,0 5px 0 #020c0f; }
 .ability-tree .skill-link { display:none; }.ability-tree .skill-tier { left:8px;top:-13px;border-radius:999px; }
 .ability-tree .skill-node h3 { font-family:var(--display-font);font-size:19px;letter-spacing:.03em; }.ability-tree .skill-node p { color:#c0dade; }.ability-tree .skill-node.locked { opacity:.52;filter:saturate(.55); }
+.ability-tree .skill-branch > header em { display:block;margin-top:4px;color:var(--branch);font:900 10px ui-monospace,monospace;font-style:normal;letter-spacing:.08em; }
+.ability-tree .skill-track { counter-reset:skill-tier; }
+.ability-tree .skill-node:nth-child(4),.ability-tree .skill-node:nth-child(8) { margin-top:12px; }
+.ability-tree .skill-node:nth-child(4)::after,.ability-tree .skill-node:nth-child(8)::after { content:"枝干阶段";position:absolute;right:12px;top:-20px;padding:3px 9px;border-radius:999px;background:#07191e;color:var(--branch);font:900 8px ui-monospace,monospace;letter-spacing:.12em; }
+.reading-skill-hint { margin:0 0 14px;padding:10px 13px;border:1px solid #79dcbc77;border-radius:12px;background:#0a2927d9;color:#dffff4;font-size:13px; }
+.reading-skill-hint summary { cursor:pointer;color:#84efc9;font-weight:900;letter-spacing:.08em; }
+.reading-skill-hint ul { margin:9px 0 0;padding-left:20px;color:#d5e9e4;line-height:1.65; }
 
 /* Shanghai mission cards: scene first, readable briefing second, entrance always visible. */
 .campaign-map { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px;padding:24px;background:linear-gradient(145deg,#08232a,#06191f); }
