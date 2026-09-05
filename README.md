@@ -8,7 +8,7 @@ S-GAME 是一款面向青年、公益活动和展会现场试玩的中文环境�
 
 ## 在线试玩
 
-打开即玩：[Vercel 正式站点](https://s-game-xi.vercel.app) · [备用站点](https://s-game.zhm5wf2rb4.chatgpt.site)
+打开即玩：[Vercel 正式站点](https://s-game-xingchen.vercel.app) · [备用站点](https://s-game.zhm5wf2rb4.chatgpt.site)
 
 站点由独立静态部署提供，不需要先打开 GitHub；支持桌面浏览器与手机浏览器。
 
