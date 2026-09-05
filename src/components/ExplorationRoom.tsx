@@ -72,7 +72,7 @@ export default function ExplorationRoom({ mission, adventure, previewTargets, on
   return <section className="exploration-room" style={{ '--room-art': `url(${adventure.background})`, '--accent': adventure.accent } as React.CSSProperties}>
     <div className="room-brief"><span className="eyebrow">MOVEABLE ROOM · {mission.location}</span><h2>{mission.title}</h2><p>{mission.objective}</p><b><ScanSearch /> 已发现 {found.length}/3</b></div>
     <div className="room-stage">
-      <span className="room-floor" /><span className="room-wall wall-a" /><span className="room-wall wall-b" /><span className="room-light" />
+      <span className="room-floor" /><span className="room-light" />
       {targets.map((target, index) => <span key={target.label} className={`room-target ${found.includes(index) ? 'found' : ''} ${previewTargets ? 'preview' : ''}`} style={{ left: `${target.x}%`, top: `${target.y}%` }}><MapPin /><b>{found.includes(index) ? `${target.label} · 已记录` : previewTargets ? target.label : '未知信号'}</b></span>)}
       <span className={`room-player face-${facing} ${moving ? 'is-moving' : ''}`} style={{ left: `${position.x}%`, top: `${position.y}%` }}><img src={sprite} alt="行动员" /><i /></span>
       <div className="room-dpad" aria-label="移动控制"><button {...hold('arrowup')} aria-label="向上移动"><ArrowUp /></button><button {...hold('arrowleft')} aria-label="向左移动"><ArrowLeft /></button><button {...hold('arrowdown')} aria-label="向下移动"><ArrowDown /></button><button {...hold('arrowright')} aria-label="向右移动"><ArrowRight /></button></div>
